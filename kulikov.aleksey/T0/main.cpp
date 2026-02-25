@@ -3,5 +3,5 @@
 int main()
 {
   std::cout << "kulikov.aleksey" << std::endl;
-  return 0
+  return 0;
 }
