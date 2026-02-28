@@ -1,2 +1,8 @@
-int main()
-{}
+#include <iostream>
+
+using namespace std;
+
+int main() {
+  cout << "lovchuk.daniil" << '\n';
+  return EXIT_SUCCSESS;
+}
