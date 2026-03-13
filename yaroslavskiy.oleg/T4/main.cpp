@@ -1,0 +1,70 @@
+﻿
+#include <iostream>
+#include <iomanip>
+#include <vector>
+#include "rectangle.h"
+#include "ellipse.h"
+#include "compositeShape.h"
+
+void printShapeInfo(const Shape* shape) {
+
+    const CompositeShape* composite = dynamic_cast<const CompositeShape*>(shape);
+
+    if (composite) {
+
+        composite->printDetails();
+    }
+
+    else {
+
+        Point center = shape->getCenter();
+        std::cout << "[" << shape->getName() << ", ("
+            << std::fixed << std::setprecision(2) << center.x << ", "
+            << center.y << "), "
+            << shape->getArea() << "]" << std::endl;
+    }
+}
+
+
+int main() {
+
+    setlocale(LC_ALL, "Russian");
+
+    Rectangle* r1 = new Rectangle(Point(0, 0), Point(4, 3));
+    Rectangle* r2 = new Rectangle(Point(1, 2), Point(4, 5));
+    Rectangle* r3 = new Rectangle(Point(-3, 4), Point(-2, 5));
+    Ellipse* e1 = new Ellipse(Point(2, 4), 2, 1);
+    Ellipse* e2 = new Ellipse(Point(6, 2), 1, 2);
+    Ellipse* e3 = new Ellipse(Point(-2, -2), 5, 5);
+    CompositeShape* c1 = new CompositeShape();
+    c1->addShape(r1);
+    c1->addShape(e1);
+
+    std::vector<Shape*> shapes;
+    shapes.push_back(r2);
+    shapes.push_back(r3);
+    shapes.push_back(e2);
+    shapes.push_back(e3);
+    shapes.push_back(c1);
+
+    std::cout << "\nФигуры до увеличения:" << std::endl;
+
+    for (Shape* shape : shapes) {
+        printShapeInfo(shape);
+        shape->scale(2.0);
+    }
+    std::cout << "\nФигуры после увеличения в 2 раза:" << std::endl;
+
+    for (Shape* shape : shapes) {
+        printShapeInfo(shape);
+        delete shape;
+    }
+
+    return EXIT_SUCCESS;
+}
+
+
+
+
+
+
