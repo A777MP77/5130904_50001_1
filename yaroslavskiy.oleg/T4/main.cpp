@@ -10,8 +10,6 @@ void printShapeInfo(const Shape* shape);
 
 int main() {
 
-    setlocale(LC_ALL, "Russian");
-
     Rectangle* r1 = new Rectangle(Point(0, 0), Point(4, 3));
     Rectangle* r2 = new Rectangle(Point(1, 2), Point(4, 5));
     Rectangle* r3 = new Rectangle(Point(-3, 4), Point(-2, 5));
@@ -29,8 +27,6 @@ int main() {
     shapes.push_back(e3);
     shapes.push_back(c1);
 
-    std::cout << "\nФигуры до увеличения:" << std::endl;
-
     for (Shape* shape : shapes) {
         printShapeInfo(shape);
     }
@@ -38,8 +34,6 @@ int main() {
     for (Shape* shape : shapes) {
         shape->scale(2.0);
     }
-
-    std::cout << "\nФигуры после увеличения в 2 раза:" << std::endl;
 
     for (Shape* shape : shapes) {
         printShapeInfo(shape);
