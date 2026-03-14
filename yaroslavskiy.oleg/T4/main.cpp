@@ -35,9 +35,9 @@ int main() {
         shape->scale(2.0);
     }
 
-    for (Shape* shape : shapes) {
-        printShapeInfo(shape);
-    }
+//    for (Shape* shape : shapes) {
+//        printShapeInfo(shape);
+//    }
 
     for (Shape* shape : shapes) {
         delete shape;
