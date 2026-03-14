@@ -1,5 +1,6 @@
 
-#pragma once
+#ifndef COMPOSITE_SHAPE_HPP
+#define COMPOSITE_SHAPE_HPP
 
 #include "shape.hpp"
 #include <vector>
@@ -23,6 +24,7 @@ public:
 
 };
 
+#endif
 
 
 

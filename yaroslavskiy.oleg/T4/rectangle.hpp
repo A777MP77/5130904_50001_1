@@ -1,5 +1,6 @@
 
-#pragma once
+#ifndef RECTANGLE_HPP
+#define RECTANGLE_HPP
 
 #include "shape.hpp"
 
@@ -21,6 +22,8 @@ public:
     std::string getName() const override;
 
 };
+
+#endif
 
 
 

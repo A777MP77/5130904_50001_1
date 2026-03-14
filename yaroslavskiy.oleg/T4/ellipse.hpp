@@ -1,5 +1,6 @@
 
-#pragma once
+#ifndef ELLIPSE_HPP
+#define ELLIPSE_HPP
 
 #include "shape.hpp"
 
@@ -23,6 +24,7 @@ public:
 
 };
 
+#endif
 
 
 
