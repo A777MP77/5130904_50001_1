@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "point.h"
+#include "point.hpp"
 #include <string>
 
 class Shape {

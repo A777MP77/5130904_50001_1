@@ -2,29 +2,11 @@
 #include <iostream>
 #include <iomanip>
 #include <vector>
-#include "rectangle.h"
-#include "ellipse.h"
-#include "compositeShape.h"
+#include "rectangle.hpp"
+#include "ellipse.hpp"
+#include "compositeShape.hpp"
 
-void printShapeInfo(const Shape* shape) {
-
-    const CompositeShape* composite = dynamic_cast<const CompositeShape*>(shape);
-
-    if (composite) {
-
-        composite->printDetails();
-    }
-
-    else {
-
-        Point center = shape->getCenter();
-        std::cout << "[" << shape->getName() << ", ("
-            << std::fixed << std::setprecision(2) << center.x << ", "
-            << center.y << "), "
-            << shape->getArea() << "]" << std::endl;
-    }
-}
-
+void printShapeInfo(const Shape* shape);
 
 int main() {
 
@@ -51,12 +33,19 @@ int main() {
 
     for (Shape* shape : shapes) {
         printShapeInfo(shape);
+    }
+    
+    for (Shape* shape : shapes) {
         shape->scale(2.0);
     }
+
     std::cout << "\nФигуры после увеличения в 2 раза:" << std::endl;
 
     for (Shape* shape : shapes) {
         printShapeInfo(shape);
+    }
+
+    for (Shape* shape : shapes) {
         delete shape;
     }
 
@@ -64,6 +53,24 @@ int main() {
 }
 
 
+void printShapeInfo(const Shape* shape) {
+
+    const CompositeShape* composite = dynamic_cast<const CompositeShape*>(shape);
+
+    if (composite) {
+
+        composite->printDetails();
+    }
+
+    else {
+
+        Point center = shape->getCenter();
+        std::cout << "[" << shape->getName() << ", ("
+            << std::fixed << std::setprecision(2) << center.x << ", "
+            << center.y << "), "
+            << shape->getArea() << "]" << std::endl;
+    }
+}
 
 
 

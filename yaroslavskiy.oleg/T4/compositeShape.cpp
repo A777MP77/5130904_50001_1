@@ -1,5 +1,7 @@
 
-#include "compositeShape.h"
+#include "compositeShape.hpp"
+#include <limits>
+#include <algorithm>
 #include <iostream>
 
 CompositeShape::CompositeShape() {}

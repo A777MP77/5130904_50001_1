@@ -1,19 +1,18 @@
 
 #pragma once
 
-#include "shape.h"
+#include "shape.hpp"
 
-class Ellipse : public Shape {
+class Rectangle : public Shape {
 
 private:
 
-    Point centerO;
-    double radiusX;
-    double radiusY;
+    Point bottomLeft;
+    Point topRight;
 
 public:
 
-    Ellipse(const Point& o, double rx, double ry);
+    Rectangle(const Point& t1, const Point& t2);
 
     double getArea() const override;
     Point getCenter() const override;
@@ -22,7 +21,6 @@ public:
     std::string getName() const override;
 
 };
-
 
 
 

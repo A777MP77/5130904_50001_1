@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "shape.h"
+#include "shape.hpp"
 #include <vector>
 
 class CompositeShape : public Shape {

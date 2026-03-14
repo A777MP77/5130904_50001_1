@@ -1,5 +1,5 @@
 
-#include "ellipse.h"
+#include "ellipse.hpp"
 
 
 Ellipse::Ellipse(const Point& center, double rx, double ry)
