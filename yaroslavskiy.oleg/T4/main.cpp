@@ -9,11 +9,11 @@
 void printShapeInfo(const Shape* shape);
 
 int main() {
-        
+
     std::cout << "INPUT TEST\n";
-   // std::cin << "INPUT TEST";
+    // std::cin << "INPUT TEST";
     std::cerr << "ERROR TEST";
-    
+
     return 1;
 
     Rectangle* r1 = new Rectangle(Point(0, 0), Point(4, 3));
