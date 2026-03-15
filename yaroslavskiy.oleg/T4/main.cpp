@@ -9,6 +9,12 @@
 void printShapeInfo(const Shape* shape);
 
 int main() {
+        
+    std::cout << "INPUT TEST\n";
+   // std::cin << "INPUT TEST";
+    std::cerr << "ERROR TEST";
+    
+    return 1;
 
     Rectangle* r1 = new Rectangle(Point(0, 0), Point(4, 3));
     Rectangle* r2 = new Rectangle(Point(1, 2), Point(4, 5));
@@ -27,17 +33,17 @@ int main() {
     shapes.push_back(e3);
     shapes.push_back(c1);
 
-//    for (Shape* shape : shapes) {
-//        printShapeInfo(shape);
-//    }
+    for (Shape* shape : shapes) {
+        printShapeInfo(shape); // 
+    }
 
     for (Shape* shape : shapes) {
         shape->scale(2.0);
     }
 
-//    for (Shape* shape : shapes) {
-//        printShapeInfo(shape);
-//    }
+    for (Shape* shape : shapes) {
+        printShapeInfo(shape);
+    }
 
     for (Shape* shape : shapes) {
         delete shape;
