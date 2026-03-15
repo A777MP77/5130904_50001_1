@@ -16,8 +16,8 @@ int main()
     std::getline(std::cin, line);
     // std::cout << "\nline:'" << line << "'";
     if (line.empty()) {
-        std::cerr << "пусто";
-        return 1;
+        std::cerr << "pusto";
+        return 0;
     }
     /*else {
         std::cout << " ne pusto";
@@ -67,7 +67,7 @@ int main()
         delete shape;
     }
 
-    return EXIT_SUCCESS;
+    return 1;
 }
 
 
