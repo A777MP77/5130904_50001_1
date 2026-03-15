@@ -15,23 +15,21 @@ int main()
     std::string line;
     std::getline(std::cin, line);
     // std::cout << "\nline:'" << line << "'";
-    if (line.empty()) {
+
+
+    if (!line.empty()) {
         std::cerr << "pusto";
-        return 0;
+        return 1;
     }
     /*else {
         std::cout << " ne pusto";
         return 0;
     }*/
 
-
-
     // std::string a = "";
     // std::cin >> a;
     // std::cout << "\n!!!\n" << a << "\n!!!\n";
-
     // std::cerr << "ERROR TEST\n";
-
     // return 1;
 
     Rectangle* r1 = new Rectangle(Point(0, 0), Point(4, 3));
@@ -67,7 +65,7 @@ int main()
         delete shape;
     }
 
-    return 1;
+    return 0;
 }
 
 
