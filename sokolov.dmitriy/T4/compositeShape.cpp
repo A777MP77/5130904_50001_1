@@ -21,7 +21,7 @@ void CompositeShape::addShape(std::unique_ptr<Shape> newShape) {
 }
 
 void CompositeShape::removeShape(const size_t index) {
-    if (index < 0 || index >= shapes_.size()) {
+    if (index >= shapes_.size()) {
         throw std::out_of_range(ERROR_INCORRECT_INDEX);
     }
     shapes_.erase(shapes_.begin() + index);
