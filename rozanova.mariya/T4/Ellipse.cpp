@@ -1,4 +1,5 @@
 #include "Ellipse.h"
+#include <iostream>
 
 const double PI = 3.14159265358979323846;
 
@@ -20,13 +21,12 @@ void Ellipse::scale(double k) {
 
 std::string Ellipse::getName() const { return "ELLIPSE"; }
 
-
 Point Ellipse::getBottomLeft() const { return Point(center_.x_ - rx_, center_.y_ - ry_); }
 
 Point Ellipse::getTopRight() const { return Point(center_.x_ + rx_, center_.y_ + ry_); }
 
 void Ellipse::print() const
 {
-    std::cout << "[" << getName() << ", (" << getCenter().x_ 
+    std::cout << "[" << getName() << ", (" << getCenter().x_
         << ", " << getCenter().y_ << "), " << getArea() << "]";
 }

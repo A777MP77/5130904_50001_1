@@ -5,21 +5,21 @@
 class Rectangle: public Shape
 {
 private:
-	Point left_;
-	Point right_;
+    Point left_;
+    Point right_;
 public:
-	Rectangle(Point left, Point right);
+    Rectangle(Point left, Point right);
 
-	double getArea() const override;
-	Point getCenter()  const override;
-	void move(double dx, double dy) override;
-	void scale(double k) override;
-	std::string getName() const override;
+    double getArea() const override;
+    Point getCenter() const override;
+    void move(double dx, double dy) override;
+    void scale(double k) override;
+    std::string getName() const override;
 
-	Point getBottomLeft() const override;
-	Point getTopRight() const override;
+    Point getBottomLeft() const override;
+    Point getTopRight() const override;
 
-	void print() const override;
+    void print() const override;
 };
 
 #endif

@@ -1,10 +1,13 @@
 #include "CompositeShape.h"
 #include <algorithm>
 #include <limits>
+#include <iostream>
 
-void CompositeShape::addShape(std::unique_ptr<Shape> shape) { shapes_.push_back(std::move(shape)); }
+void CompositeShape::addShape(std::unique_ptr<Shape> shape) {
+    shapes_.push_back(std::move(shape));
+}
 
-double CompositeShape::getArea() const 
+double CompositeShape::getArea() const
 {
     double area = 0.0;
     for (const auto& shape : shapes_) {
@@ -25,14 +28,13 @@ void CompositeShape::scale(double k) {
     Point center = getCenter();
 
     for (auto& shape : shapes_) {
-        // Сначала смещаем центр фигуры относительно общего центра
         Point shapeCenter = shape->getCenter();
         double dx = shapeCenter.x_ - center.x_;
         double dy = shapeCenter.y_ - center.y_;
 
-        shape->move(-dx, -dy);  // временно переносим в центр
-        shape->scale(k);         // масштабируем
-        shape->move(dx * k, dy * k);  // отодвигаем обратно с учетом k
+        shape->move(-dx, -dy);
+        shape->scale(k);
+        shape->move(dx * k, dy * k);
     }
 }
 
@@ -84,7 +86,7 @@ void CompositeShape::print() const
     std::cout << "[" << getName() << ", (" << getCenter().x_ << ", " << getCenter().y_ << "), " << getArea() << ":\n";
 
     for (size_t i = 0; i < shapes_.size(); ++i) {
-        std::cout << "  " << shapes_[i]->getName() << ", (" << shapes_[i]->getCenter().x_ << ", " 
+        std::cout << "  " << shapes_[i]->getName() << ", (" << shapes_[i]->getCenter().x_ << ", "
             << shapes_[i]->getCenter().y_ << "), " << shapes_[i]->getArea();
         if (i < shapes_.size() - 1)
             std::cout << ",";

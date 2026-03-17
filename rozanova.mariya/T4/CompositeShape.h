@@ -7,7 +7,7 @@
 class CompositeShape: public Shape
 {
 private:
-	std::vector<std::unique_ptr<Shape>> shapes_;
+    std::vector<std::unique_ptr<Shape>> shapes_;
 public:
     CompositeShape() = default;
 
@@ -23,7 +23,6 @@ public:
     Point getTopRight() const override;
 
     void print() const override;
-
 };
 
 #endif
