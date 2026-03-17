@@ -97,7 +97,7 @@ void CompositeShape::move(const double dx, const double dy) {
 }
 
 void CompositeShape::scale(const double coeff) {
-    
+
     if (shapes_.empty()) {
         throw std::logic_error(ERROR_COMPOSITE_SHAPE_IS_EMPTY);
     }
