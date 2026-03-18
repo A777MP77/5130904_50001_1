@@ -2,7 +2,7 @@
 #define SHAPE_H
 
 #include <string>
-#include "point.hpp"
+#include "Point.hpp"
 
 class Shape {
 public:
