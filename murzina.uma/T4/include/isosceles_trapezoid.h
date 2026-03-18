@@ -1,4 +1,3 @@
-#pragma once
 #include "shape.h"
 
 class IsoscelesTrapezoid : public Shape {
