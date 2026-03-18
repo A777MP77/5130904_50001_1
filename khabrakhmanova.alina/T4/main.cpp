@@ -3,8 +3,8 @@
 #include <memory>
 #include <vector>
 #include <cstdlib>
-#include "Rectangle.h"
-#include "Circle.h"
+#include "rectangle.h"
+#include "circle.h"
 #include "CompositeShape.h"
 
 void printShape(const Shape& shape) {
