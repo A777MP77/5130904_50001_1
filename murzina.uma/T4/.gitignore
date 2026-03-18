@@ -1,6 +1,0 @@
-*.o
-*.out
-*.exe
-build/
-.DS_Store
-out/
