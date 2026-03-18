@@ -7,7 +7,8 @@
 #include "include/isosceles_trapezoid.h"
 #include "include/composite_shape.h"
 
-int main() {
+int main()
+{
     std::cout << std::fixed << std::setprecision(2);
 
     std::vector<std::unique_ptr<Shape>> shapes;
@@ -24,12 +25,15 @@ int main() {
     shapes.push_back(std::make_unique<Rectangle>(Point(-5, -5), Point(-2, -1)));
 
     std::cout << "BEFORE SCALE\n";
-    for (const auto& s : shapes) std::cout << *s << "\n";
+    for (const auto &s : shapes)
+        std::cout << *s << "\n";
 
-    for (auto& s : shapes) s->scale(2.0);
+    for (auto &s : shapes)
+        s->scale(2.0);
 
     std::cout << "AFTER SCALE x2\n";
-    for (const auto& s : shapes) std::cout << *s << "\n";
+    for (const auto &s : shapes)
+        std::cout << *s << "\n";
 
     return 0;
 }

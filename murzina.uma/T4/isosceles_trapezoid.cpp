@@ -2,27 +2,34 @@
 #include <stdexcept>
 
 IsoscelesTrapezoid::IsoscelesTrapezoid(Point bl, double bb, double tb, double h)
-    : bl_(bl), bottomBase_(bb), topBase_(tb), height_(h) {
+    : bl_(bl), bottomBase_(bb), topBase_(tb), height_(h)
+{
     if (bb <= 0 || tb <= 0 || h <= 0)
         throw std::invalid_argument("Dimensions must be positive");
 }
 
-double IsoscelesTrapezoid::getArea() const {
+double IsoscelesTrapezoid::getArea() const
+{
     return (bottomBase_ + topBase_) * height_ / 2.0;
 }
 
-Point IsoscelesTrapezoid::getCenter() const {
+Point IsoscelesTrapezoid::getCenter() const
+{
     double cx = bl_.x + topOffset() + (bottomBase_ + topBase_) / 4.0;
     double cy = bl_.y + height_ / 2.0;
     return Point(cx, cy);
 }
 
-void IsoscelesTrapezoid::move(double dx, double dy) {
-    bl_.x += dx; bl_.y += dy;
+void IsoscelesTrapezoid::move(double dx, double dy)
+{
+    bl_.x += dx;
+    bl_.y += dy;
 }
 
-void IsoscelesTrapezoid::scale(double k) {
-    if (k <= 0) return;
+void IsoscelesTrapezoid::scale(double k)
+{
+    if (k <= 0)
+        return;
     Point c = getCenter();
     bottomBase_ *= k;
     topBase_ *= k;
@@ -32,6 +39,7 @@ void IsoscelesTrapezoid::scale(double k) {
     bl_ = c + offset;
 }
 
-std::unique_ptr<Shape> IsoscelesTrapezoid::clone() const {
+std::unique_ptr<Shape> IsoscelesTrapezoid::clone() const
+{
     return std::make_unique<IsoscelesTrapezoid>(*this);
 }
