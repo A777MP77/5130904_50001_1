@@ -49,7 +49,6 @@ void CompositeShape::scale(double factor) {
     }
     Point center = getCenter();
     for (auto& s : shapes) {
-   GNU nano 8.7                  composite_shape.cpp                   Modified
         Point oldCenter = s->getCenter();
         double dx = oldCenter.x - center.x;
         double dy = oldCenter.y - center.y;
@@ -67,20 +66,3 @@ std::string CompositeShape::getName() const {
     return "COMPOSITE";
 }
 
-
-       Point oldCenter = s->getCenter();
-        double dx = oldCenter.x - center.x;
-        double dy = oldCenter.y - center.y;
-        dx *= factor;
-        dy *= factor;
-        s->scale(factor);
-        Point newCenter = s->getCenter();
-        double deltaX = (center.x + dx) - newCenter.x;
-        double deltaY = (center.y + dy) - newCenter.y;
-        s->move(deltaX, deltaY);
-    }
-}
-
-std::string CompositeShape::getName() const {
-    return "COMPOSITE";
-}
