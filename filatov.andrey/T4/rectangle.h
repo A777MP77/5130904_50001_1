@@ -17,4 +17,5 @@ private:
     double left, bottom, right, top;
 };
 
-#endif // RECTANGLE_H 
+#endif // RECTANGLE_H
+

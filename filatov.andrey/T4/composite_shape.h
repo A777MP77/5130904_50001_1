@@ -19,4 +19,5 @@ private:
     std::vector<std::unique_ptr<Shape>> shapes;
 };
 
-#endif // COMPOSITE_SHAPE_H 
+#endif // COMPOSITE_SHAPE_H
+

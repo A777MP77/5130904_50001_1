@@ -18,4 +18,5 @@ private:
     double radius;
 };
 
-#endif // CIRCLE_H 
+#endif // CIRCLE_H
+

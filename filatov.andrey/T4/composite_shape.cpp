@@ -64,4 +64,5 @@ void CompositeShape::scale(double factor) {
 
 std::string CompositeShape::getName() const {
     return "COMPOSITE";
-} 
+}
+
