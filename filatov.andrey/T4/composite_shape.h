@@ -8,7 +8,7 @@
 class CompositeShape : public Shape {
 public:
     void addShape(std::unique_ptr<Shape> shape);
-    
+
     double getArea() const override;
     Point getCenter() const override;
     void move(double dx, double dy) override;
@@ -19,4 +19,4 @@ private:
     std::vector<std::unique_ptr<Shape>> shapes;
 };
 
-#endif // COMPOSITE_SHAPE_H
+#endif // COMPOSITE_SHAPE_H 

@@ -6,7 +6,7 @@
 class Rectangle : public Shape {
 public:
     Rectangle(double x1, double y1, double x2, double y2);
-    
+
     double getArea() const override;
     Point getCenter() const override;
     void move(double dx, double dy) override;
@@ -17,4 +17,4 @@ private:
     double left, bottom, right, top;
 };
 
-#endif // RECTANGLE_H
+#endif // RECTANGLE_H 
