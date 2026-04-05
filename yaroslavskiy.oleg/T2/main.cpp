@@ -49,8 +49,8 @@ bool compare(const nspace::DataStruct& a, const nspace::DataStruct& b)
 {
     if (a.key1 != b.key1) return a.key1 < b.key1;
 
-    double va = (double)a.key2.first / a.key2.second;
-    double vb = (double)b.key2.first / b.key2.second;
+    double va = static_cast<double>(a.key2.first) / a.key2.second;
+    double vb = static_cast<double>(b.key2.first) / b.key2.second;
 
     if (std::fabs(va - vb) > 1e-12) return va < vb;
 
