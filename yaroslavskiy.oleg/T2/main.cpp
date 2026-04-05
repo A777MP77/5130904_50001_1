@@ -12,12 +12,6 @@ bool compare(const nspace::DataStruct& a, const nspace::DataStruct& b);
 
 int main()
 {
-    setlocale(LC_ALL, "Russian");
-
-    std::cout << "\nПривет! [=^.^=]\n";
-    std::cout << "Чтение и сортировка структур DataStruct (Вариант 11)\n";
-    std::cout << "Для завершения ввода Ctrl+Z и Enter\n\n";
-
     std::vector<nspace::DataStruct> data;
 
     std::copy(
@@ -26,11 +20,8 @@ int main()
         std::back_inserter(data)
     );
 
-    std::cout << "\nПрочитано записей: " << data.size() << "\n";
-
     if (data.empty())
     {
-        std::cout << "Не удалось прочитать ни одной записи.\n";
         return EXIT_FAILURE;
     }
 
@@ -56,4 +47,7 @@ bool compare(const nspace::DataStruct& a, const nspace::DataStruct& b)
 
     return a.key3.size() < b.key3.size();
 }
+
+
+
 
