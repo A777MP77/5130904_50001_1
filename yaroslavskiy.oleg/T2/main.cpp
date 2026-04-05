@@ -14,11 +14,14 @@ int main()
 {
     std::vector<nspace::DataStruct> data;
 
-    std::copy(
-        std::istream_iterator<nspace::DataStruct>(std::cin),
-        std::istream_iterator<nspace::DataStruct>(),
-        std::back_inserter(data)
-    );
+    std::istream_iterator<nspace::DataStruct> it(std::cin);
+    std::istream_iterator<nspace::DataStruct> end;
+
+    while (it != end)
+    {
+        data.push_back(*it);
+        ++it;
+    }
 
     if (data.empty())
     {

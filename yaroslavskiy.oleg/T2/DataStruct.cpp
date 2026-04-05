@@ -13,6 +13,9 @@ namespace nspace
             return in;
         }
 
+        // Ищем нужный формат: (:key1 <число>LL:key2 (:N <число>:D <число>:):key3 "<строка">:)
+        // Если формат не подходит - пропускаем строку и ставим failbit
+
         size_t pos1 = line.find(":key1 ");
         if (pos1 == std::string::npos)
         {
@@ -28,16 +31,32 @@ namespace nspace
             return in;
         }
 
+        // Проверяем, что между :key1 и LL только цифры и минус
         std::string key1_str = line.substr(pos1, pos2 - pos1);
+        bool valid_key1 = true;
+        for (char c : key1_str)
+        {
+            if (c != '-' && (c < '0' || c > '9'))
+            {
+                valid_key1 = false;
+                break;
+            }
+        }
+        if (!valid_key1)
+        {
+            in.setstate(std::ios::failbit);
+            return in;
+        }
+
         dest.key1 = std::stoll(key1_str);
 
-        size_t posN = line.find(":N ");
+        size_t posN = line.find(":key2 (:N ");
         if (posN == std::string::npos)
         {
             in.setstate(std::ios::failbit);
             return in;
         }
-        posN += 3;
+        posN += 10; // length of ":key2 (:N "
 
         size_t posD = line.find(":D ", posN);
         if (posD == std::string::npos)
@@ -47,9 +66,24 @@ namespace nspace
         }
 
         std::string num_str = line.substr(posN, posD - posN);
+        bool valid_num = true;
+        for (char c : num_str)
+        {
+            if (c != '-' && (c < '0' || c > '9'))
+            {
+                valid_num = false;
+                break;
+            }
+        }
+        if (!valid_num)
+        {
+            in.setstate(std::ios::failbit);
+            return in;
+        }
+
         long long num = std::stoll(num_str);
 
-        size_t posClose = line.find(":)", posD + 3);
+        size_t posClose = line.find(":):", posD + 3);
         if (posClose == std::string::npos)
         {
             in.setstate(std::ios::failbit);
@@ -57,6 +91,21 @@ namespace nspace
         }
 
         std::string den_str = line.substr(posD + 3, posClose - (posD + 3));
+        bool valid_den = true;
+        for (char c : den_str)
+        {
+            if (c < '0' || c > '9')
+            {
+                valid_den = false;
+                break;
+            }
+        }
+        if (!valid_den)
+        {
+            in.setstate(std::ios::failbit);
+            return in;
+        }
+
         unsigned long long den = std::stoull(den_str);
 
         dest.key2 = { num, den };
@@ -78,6 +127,13 @@ namespace nspace
 
         dest.key3 = line.substr(posKey3, posQuote - posKey3);
 
+        // Проверяем закрывающую скобку
+        if (line.find(":)", posQuote) == std::string::npos)
+        {
+            in.setstate(std::ios::failbit);
+            return in;
+        }
+
         return in;
     }
 
@@ -89,5 +145,10 @@ namespace nspace
         return out;
     }
 }
+
+
+
+
+
 
 
