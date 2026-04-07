@@ -1,6 +1,6 @@
 
-#ifndef FORMATS_HPP
-#define FORMATS_HPP
+#ifndef FORMAT_HPP
+#define FORMAT_HPP
 
 #include <string>
 #include <utility>
