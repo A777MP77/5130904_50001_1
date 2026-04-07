@@ -1,23 +1,23 @@
 
-#ifndef DATASTRUCT_HPP
-#define DATASTRUCT_HPP
+#ifndef DATA_STRUCT_HPP
+#define DATA_STRUCT_HPP
 
-#include <iostream>
+#include <iosfwd>
 #include <string>
 #include <utility>
 
-namespace nspace
+struct DataStruct
 {
-    struct DataStruct
-    {
-        long long key1;
-        std::pair<long long, unsigned long long> key2;
-        std::string key3;
-    };
+  long long key1;
+  std::pair<long long, unsigned long long> key2;
+  std::string key3;
+};
 
-    std::istream& operator>>(std::istream& in, DataStruct& dest);
-    std::ostream& operator<<(std::ostream& out, const DataStruct& src);
-    bool compare(const DataStruct& a, const DataStruct& b);
-}
+bool compareDataStruct(const DataStruct& lhs, const DataStruct& rhs);
+
+std::istream& operator>>(std::istream& in, DataStruct& value);
+std::ostream& operator<<(std::ostream& out, const DataStruct& value);
 
 #endif
+
+

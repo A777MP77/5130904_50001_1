@@ -1,38 +1,26 @@
-
-// T2 Yaroslavsky Oleg 5130904/50001 Variant 11
+﻿
+// T2 Yaroslavsky Oleg 5130904 / 50001 Varian 11
 
 #include "DataStruct.hpp"
-#include <iostream>
-#include <vector>
-#include <iterator>
 #include <algorithm>
+#include <iostream>
+#include <iterator>
+#include <vector>
 
 int main()
 {
-    std::vector<nspace::DataStruct> data;
+    std::vector<DataStruct> data;
 
     std::copy(
-        std::istream_iterator<nspace::DataStruct>(std::cin),
-        std::istream_iterator<nspace::DataStruct>(),
-        std::back_inserter(data)
-    );
+        std::istream_iterator<DataStruct>(std::cin),
+        std::istream_iterator<DataStruct>(),
+        std::back_inserter(data));
 
-    if (data.empty())
-    {
-        std::cout << "Atleast one supported record type" << std::endl;
-        return EXIT_SUCCESS;
-    }
-
-    std::sort(data.begin(), data.end(), nspace::compare);
+    std::sort(data.begin(), data.end(), compareDataStruct);
 
     std::copy(
-        data.begin(),
-        data.end(),
-        std::ostream_iterator<nspace::DataStruct>(std::cout, "\n")
-    );
-
-    return EXIT_SUCCESS;
+        data.cbegin(),
+        data.cend(),
+        std::ostream_iterator<DataStruct>(std::cout, "\n"));
 }
-
-
 
