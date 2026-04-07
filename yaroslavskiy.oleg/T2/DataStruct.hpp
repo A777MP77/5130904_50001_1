@@ -17,9 +17,7 @@ namespace nspace
 
     std::istream& operator>>(std::istream& in, DataStruct& dest);
     std::ostream& operator<<(std::ostream& out, const DataStruct& src);
+    bool compare(const DataStruct& a, const DataStruct& b);
 }
 
-
 #endif
-
-

@@ -1,155 +1,146 @@
 
+
 #include "DataStruct.hpp"
-#include <string>
+#include "Parsers.hpp"
+#include "OldFormat.hpp"
 #include <sstream>
+#include <vector>
 #include <cctype>
 
 namespace nspace
 {
+    static bool parseFromString(const std::string& line, DataStruct& dest)
+    {
+        if (line.empty() || line.front() != '(' || line.back() != ')')
+        {
+            return false;
+        }
+
+        std::string content = line.substr(1, line.size() - 2);
+
+        std::vector<std::string> tokens;
+        std::string current;
+        bool inQuotes = false;
+
+        for (char c : content)
+        {
+            if (c == '"')
+            {
+                inQuotes = !inQuotes;
+                current += c;
+                continue;
+            }
+            if (!inQuotes && c == ':')
+            {
+                if (!current.empty())
+                {
+                    tokens.push_back(current);
+                    current.clear();
+                }
+                continue;
+            }
+            current += c;
+        }
+        if (!current.empty())
+        {
+            tokens.push_back(current);
+        }
+
+        DataStruct temp;
+        bool hasKey1 = false, hasKey2 = false, hasKey3 = false;
+
+        for (const auto& token : tokens)
+        {
+            size_t spacePos = token.find_first_of(" \t");
+            if (spacePos == std::string::npos)
+            {
+                continue;
+            }
+
+            std::string key = token.substr(0, spacePos);
+            std::string value = token.substr(spacePos + 1);
+
+            if (key == "key1")
+            {
+                std::istringstream iss(value);
+                if (iss >> SllLitIO{ temp.key1 })
+                {
+                    hasKey1 = true;
+                }
+            }
+            else if (key == "key2")
+            {
+                std::istringstream iss(value);
+                if (iss >> RationalIO{ temp.key2 })
+                {
+                    hasKey2 = true;
+                }
+            }
+            else if (key == "key3")
+            {
+                std::istringstream iss(value);
+                if (iss >> StringIO{ temp.key3 })
+                {
+                    hasKey3 = true;
+                }
+            }
+        }
+
+        if (hasKey1 && hasKey2 && hasKey3)
+        {
+            dest = std::move(temp);
+            return true;
+        }
+        return false;
+    }
+
     std::istream& operator>>(std::istream& in, DataStruct& dest)
     {
         std::string line;
-        if (!std::getline(in, line))
+        while (std::getline(in, line))
         {
-            return in;
-        }
-
-        size_t key1_pos = line.find(":key1 ");
-        if (key1_pos == std::string::npos)
-        {
-            in.setstate(std::ios::failbit);
-            return in;
-        }
-
-        size_t key1_start = key1_pos + 6;
-        size_t key1_end = line.find("LL", key1_start);
-        if (key1_end == std::string::npos)
-        {
-            in.setstate(std::ios::failbit);
-            return in;
-        }
-
-        std::string key1_str = line.substr(key1_start, key1_end - key1_start);
-        bool key1_ok = true;
-        for (size_t i = 0; i < key1_str.size(); ++i)
-        {
-            if (i == 0 && key1_str[i] == '-') continue;
-            if (!std::isdigit(static_cast<unsigned char>(key1_str[i])))
+            size_t start = line.find_first_not_of(" \t");
+            if (start != std::string::npos)
             {
-                key1_ok = false;
-                break;
+                size_t end = line.find_last_not_of(" \t");
+                line = line.substr(start, end - start + 1);
+            }
+
+            if (parseFromString(line, dest))
+            {
+                return in;
             }
         }
-        if (!key1_ok || key1_str.empty())
-        {
-            in.setstate(std::ios::failbit);
-            return in;
-        }
 
-        dest.key1 = std::stoll(key1_str);
-
-        size_t key2_pos = line.find(":key2 (:N ");
-        if (key2_pos == std::string::npos)
-        {
-            in.setstate(std::ios::failbit);
-            return in;
-        }
-
-        size_t num_start = key2_pos + 11;
-        size_t d_pos = line.find(":D ", num_start);
-        if (d_pos == std::string::npos)
-        {
-            in.setstate(std::ios::failbit);
-            return in;
-        }
-
-        std::string num_str = line.substr(num_start, d_pos - num_start);
-        bool num_ok = true;
-        for (size_t i = 0; i < num_str.size(); ++i)
-        {
-            if (i == 0 && num_str[i] == '-') continue;
-            if (!std::isdigit(static_cast<unsigned char>(num_str[i])))
-            {
-                num_ok = false;
-                break;
-            }
-        }
-        if (!num_ok || num_str.empty())
-        {
-            in.setstate(std::ios::failbit);
-            return in;
-        }
-
-        long long numerator = std::stoll(num_str);
-
-        size_t den_start = d_pos + 3;
-        size_t close_pos = line.find(":)", den_start);
-        if (close_pos == std::string::npos)
-        {
-            in.setstate(std::ios::failbit);
-            return in;
-        }
-
-        std::string den_str = line.substr(den_start, close_pos - den_start);
-        bool den_ok = true;
-        for (size_t i = 0; i < den_str.size(); ++i)
-        {
-            if (!std::isdigit(static_cast<unsigned char>(den_str[i])))
-            {
-                den_ok = false;
-                break;
-            }
-        }
-        if (!den_ok || den_str.empty())
-        {
-            in.setstate(std::ios::failbit);
-            return in;
-        }
-
-        unsigned long long denominator = std::stoull(den_str);
-
-        if (denominator == 0)
-        {
-            in.setstate(std::ios::failbit);
-            return in;
-        }
-
-        dest.key2 = { numerator, denominator };
-
-        size_t key3_pos = line.find(":key3 \"");
-        if (key3_pos == std::string::npos)
-        {
-            in.setstate(std::ios::failbit);
-            return in;
-        }
-
-        size_t key3_start = key3_pos + 7;
-        size_t quote_pos = line.find("\"", key3_start);
-        if (quote_pos == std::string::npos)
-        {
-            in.setstate(std::ios::failbit);
-            return in;
-        }
-
-        dest.key3 = line.substr(key3_start, quote_pos - key3_start);
-
-        if (line.find(":)", quote_pos) == std::string::npos)
-        {
-            in.setstate(std::ios::failbit);
-            return in;
-        }
-
+        in.setstate(std::ios::failbit);
         return in;
     }
 
     std::ostream& operator<<(std::ostream& out, const DataStruct& src)
     {
+        OldFormat guard(out);
         out << "(:key1 " << src.key1 << "LL"
             << ":key2 (:N " << src.key2.first << ":D " << src.key2.second << ":)"
             << ":key3 \"" << src.key3 << "\":)";
         return out;
     }
+
+    bool compare(const DataStruct& a, const DataStruct& b)
+    {
+        if (a.key1 != b.key1)
+        {
+            return a.key1 < b.key1;
+        }
+
+        double va = static_cast<double>(a.key2.first) / a.key2.second;
+        double vb = static_cast<double>(b.key2.first) / b.key2.second;
+
+        if (va != vb)
+        {
+            return va < vb;
+        }
+
+        return a.key3.size() < b.key3.size();
+    }
 }
-
-
 
