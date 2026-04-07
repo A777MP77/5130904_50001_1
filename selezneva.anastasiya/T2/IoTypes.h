@@ -2,25 +2,32 @@
 #define IOTYPES_H
 
 #include <iostream>
-#include "DataStruct.h"
+#include <string>
 
 struct DelimiterIO {
-    char exp = 0;
+    char exp;
 };
 
 struct DoubleSciIO {
     double& ref;
 };
 
-struct LongLongLitIO {
+struct SllLitIO {
     long long& ref;
+};
+
+struct StringIO {
+    std::string& ref;
+};
+
+struct LabelIO {
+    std::string exp;
 };
 
 std::istream& operator>>(std::istream& in, DelimiterIO&& dest);
 std::istream& operator>>(std::istream& in, DoubleSciIO&& dest);
-std::istream& operator>>(std::istream& in, LongLongLitIO&& dest);
-std::istream& operator>>(std::istream& in, DataStruct& dest);
-
-std::ostream& operator<<(std::ostream& out, const DataStruct& src);
+std::istream& operator>>(std::istream& in, SllLitIO&& dest);
+std::istream& operator>>(std::istream& in, StringIO&& dest);
+std::istream& operator>>(std::istream& in, LabelIO&& dest);
 
 #endif
