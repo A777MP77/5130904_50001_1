@@ -1,5 +1,6 @@
 #include "DataStruct.h"
 #include <iomanip>
+#include <limits>
 
 namespace nspace
 {
@@ -28,7 +29,7 @@ namespace nspace
         return in;
     }
 
-    // Чтение восьмиричного числа
+    // Чтение восьмеричного числа
     std::istream& operator>>(std::istream& in, OctIO&& dest)
     {
         std::istream::sentry sentry(in);
@@ -51,23 +52,34 @@ namespace nspace
         if (!in && token.empty())
             return in;
 
-        if (token.size() >= 2 && token[0] == '0' && (token[1] == 'o' || token[1] == 'O'))
+        if (token.size() >= 1 && token[0] == '0')
         {
-            std::string octStr = token.substr(2);
-            for (char ch : octStr)
-                if (ch < '0' || ch > '7') {
-                    in.setstate(std::ios::failbit);
-                    return in;
+            bool valid = true;
+            for (char ch : token)
+            {
+                if (ch < '0' || ch > '7')
+                {
+                    valid = false;
+                    break;
                 }
-            dest.ref = std::stoull(octStr, nullptr, 8);
+            }
+            if (valid && token.size() > 1)
+            {
+                dest.ref = std::stoull(token, nullptr, 8);
+            }
+            else
+            {
+                in.setstate(std::ios::failbit);
+            }
         }
         else
+        {
             in.setstate(std::ios::failbit);
+        }
 
         return in;
     }
 
-    // Чтение комплексного числа
     std::istream& operator>>(std::istream& in, ComplexIO&& dest)
     {
         std::istream::sentry sentry(in);
@@ -76,7 +88,7 @@ namespace nspace
 
         double real, imag;
         in >> DelimiterIO{ '#' } >> DelimiterIO{ 'c' } >> DelimiterIO{ '(' }
-        >> real >> imag >> DelimiterIO{ ')' };
+           >> real >> imag >> DelimiterIO{ ')' };
 
         if (in)
             dest.ref = std::complex<double>(real, imag);
@@ -152,9 +164,7 @@ namespace nspace
             if (!in) return in;
         }
 
-        // Читаем двоеточие перед закрывающей скобкой
         in >> DelimiterIO{ ':' };
-        // Читаем закрывающую скобку
         in >> DelimiterIO{ ')' };
 
         if (key1_read && key2_read && key3_read)
@@ -170,7 +180,7 @@ namespace nspace
     {
         Iofmtguard guard(out);
 
-        out << "(:key1 0o" << std::oct << src.key1 << ":"
+        out << "(:key1 " << std::oct << src.key1 << ":"
             << "key2 #c(" << std::fixed << std::setprecision(1)
             << src.key2.real() << " " << src.key2.imag() << "):"
             << "key3 \"" << src.key3 << "\":)";
