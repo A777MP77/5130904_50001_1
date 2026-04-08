@@ -1,5 +1,6 @@
 
-#include "Parsers.hpp"
+/*
+#include "parsers.hpp"
 #include "DataStruct.hpp"
 #include <cctype>
 #include <istream>
@@ -369,5 +370,5 @@ bool parseRecord(const std::string& text, DataStruct& value)
     return false;
 }
 
-
+*/
 

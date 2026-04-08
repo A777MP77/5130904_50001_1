@@ -1,4 +1,4 @@
-
+/*
 #ifndef PARSERS_HPP
 #define PARSERS_HPP
 
@@ -11,4 +11,4 @@ bool readRecord(std::istream& in, std::string& record);
 bool parseRecord(const std::string& text, DataStruct& value);
 
 #endif
-
+*/
