@@ -48,8 +48,19 @@ bool parseLine(const std::string& input, DataStruct& out)
     std::string tok = s.substr(i, col - i);
 
 
-    if (tok.empty() || tok[0] != '0') return false;
-    for (char c : tok) if (c < '0' || c > '7') return false;
+    if (tok.size() > 1)
+    {
+      bool allZero = true;
+      for (char c : tok)
+      {
+        if (c != '0')
+        {
+          allZero = false;
+          break;
+        }
+      }
+      if (allZero) return false;
+    }
 
 
     try
