@@ -184,12 +184,6 @@ int main()
     std::back_inserter(data)
   );
 
-  if (std::cin.eof() && data.empty())
-  {
-    std::cout << "Looks like there is no supported record. Cannot determine input. Test skipped\n";
-    return 0;
-  }
-
   if (data.empty())
   {
     std::cout << "Atleast one supported record type\n";
