@@ -14,6 +14,11 @@ int main() {
         std::back_inserter(data)
     );
 
+    if (data.empty()) {
+        std::cout << "Atleast one supported record type" << std::endl;
+        return 0;
+    }
+
     std::sort(data.begin(), data.end(), compareDataStruct);
 
     std::copy(
@@ -22,5 +27,5 @@ int main() {
         std::ostream_iterator<DataStruct>(std::cout, "\n")
     );
 
-    return EXIT_SUCCESS;
+    return 0;
 }
