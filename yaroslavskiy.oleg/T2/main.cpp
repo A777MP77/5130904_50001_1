@@ -9,25 +9,19 @@
 
 int main()
 {
-    std::string line;
-    std::getline(std::cin, line);
+  std::vector<DataStruct> data;
 
-    if (line.empty()) {
-        return EXIT_FAILURE;
-    }
+  std::copy(
+      std::istream_iterator<DataStruct>(std::cin),
+      std::istream_iterator<DataStruct>(),
+      std::back_inserter(data));
 
-    std::vector<DataStruct> data;
+  std::sort(data.begin(), data.end(), compareDataStruct);
 
-    std::copy(
-        std::istream_iterator<DataStruct>(std::cin),
-        std::istream_iterator<DataStruct>(),
-        std::back_inserter(data));
-
-    std::sort(data.begin(), data.end(), compareDataStruct);
-
-    std::copy(
-        data.cbegin(),
-        data.cend(),
-        std::ostream_iterator<DataStruct>(std::cout, "\n"));
+  std::copy(
+      data.cbegin(),
+      data.cend(),
+      std::ostream_iterator<DataStruct>(std::cout, "\n"));
 }
+
 

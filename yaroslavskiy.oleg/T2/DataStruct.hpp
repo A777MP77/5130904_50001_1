@@ -20,4 +20,3 @@ std::ostream& operator<<(std::ostream& out, const DataStruct& value);
 
 #endif
 
-
