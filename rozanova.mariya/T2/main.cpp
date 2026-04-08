@@ -4,6 +4,7 @@
 #include <iterator>
 #include <algorithm>
 #include <cmath>
+#include <limits>
 
 int main()
 {
@@ -11,11 +12,19 @@ int main()
 
     std::vector<DataStruct> data;
 
-    std::copy(
-        std::istream_iterator<DataStruct>(std::cin),
-        std::istream_iterator<DataStruct>(),
-        std::back_inserter(data)
-    );
+    while (std::cin)
+    {
+        DataStruct ds;
+        if (std::cin >> ds)
+        {
+            data.push_back(ds);
+        }
+        else
+        {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        }
+    }
 
     std::sort(data.begin(), data.end(),
         [](const DataStruct& a, const DataStruct& b)
