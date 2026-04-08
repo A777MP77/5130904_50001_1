@@ -1,5 +1,5 @@
-#ifndef IOTYPES_H
-#define IOTYPES_H
+#ifndef IO_TYPES_HPP
+#define IO_TYPES_HPP
 
 #include <iostream>
 #include <string>

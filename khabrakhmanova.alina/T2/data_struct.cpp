@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <cmath>
 #include <vector>
+#include <stdexcept>
 
 std::string formatHexULL(unsigned long long value) {
     std::ostringstream oss;
@@ -19,7 +20,7 @@ std::string formatComplex(const std::complex<double>& value) {
 
 bool parseFromString(const std::string& line, DataStruct& dest) {
     if (line.empty() || line.front() != '(' || line.back() != ')') {
-        return false;
+        throw std::runtime_error("Invalid format");
     }
 
     std::string content = line.substr(1, line.size() - 2);
@@ -61,16 +62,22 @@ bool parseFromString(const std::string& line, DataStruct& dest) {
             std::istringstream iss(value);
             if (iss >> ULLHexIO{ temp.key1 }) {
                 hasKey1 = true;
+            } else {
+                throw std::runtime_error("Failed to parse key1");
             }
         } else if (key == "key2") {
             std::istringstream iss(value);
             if (iss >> ComplexIO{ temp.key2 }) {
                 hasKey2 = true;
+            } else {
+                throw std::runtime_error("Failed to parse key2");
             }
         } else if (key == "key3") {
             std::istringstream iss(value);
             if (iss >> StringIO{ temp.key3 }) {
                 hasKey3 = true;
+            } else {
+                throw std::runtime_error("Failed to parse key3");
             }
         }
     }
@@ -79,7 +86,7 @@ bool parseFromString(const std::string& line, DataStruct& dest) {
         dest = std::move(temp);
         return true;
     }
-    return false;
+    throw std::runtime_error("Missing fields");
 }
 
 std::istream& operator>>(std::istream& in, DataStruct& dest) {
@@ -90,8 +97,12 @@ std::istream& operator>>(std::istream& in, DataStruct& dest) {
             size_t end = line.find_last_not_of(" \t");
             line = line.substr(start, end - start + 1);
         }
-        if (parseFromString(line, dest)) {
-            return in;
+        try {
+            if (parseFromString(line, dest)) {
+                return in;
+            }
+        } catch (const std::exception&) {
+            continue;
         }
     }
     in.setstate(std::ios::failbit);
