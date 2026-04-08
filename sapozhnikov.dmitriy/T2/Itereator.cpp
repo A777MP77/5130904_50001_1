@@ -167,9 +167,28 @@ int main()
 
   std::vector<DataStruct> data;
 
-  std::copy(std::istream_iterator<DataStruct>(std::cin),
-    std::istream_iterator<DataStruct>(),
-    std::back_inserter(data));
+  std::string line;
+  bool hasInput = false;
+
+  while (std::getline(std::cin, line))
+  {
+    hasInput = true;
+
+    DataStruct tmp{};
+    if (parseLine(line, tmp))
+    {
+      data.push_back(tmp);
+    }
+  }
+
+  if (!hasInput)
+  {
+    throw std::runtime_error("Looks like there is no supported record. Cannot determine input. Test skipped");
+  }
+  if (data.empty())
+  {
+    throw std::runtime_error("Atleast one supported record type");
+  }
 
   std::sort(data.begin(), data.end(), DataLess{});
 
