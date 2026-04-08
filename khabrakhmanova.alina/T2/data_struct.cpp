@@ -1,11 +1,8 @@
 #include "data_struct.hpp"
-#include "delimiters.hpp"
-#include "iofmtguard.hpp"
 #include <cmath>
 #include <iomanip>
 #include <algorithm>
-#include <stdexcept>
-#include <sstream>
+#include <cctype>
 
 namespace nspace
 {
@@ -33,24 +30,21 @@ namespace nspace
         std::istream::sentry sentry(in);
         if (!sentry) return in;
 
-        while (isspace(in.peek())) in.get();
+        while (std::isspace(in.peek())) in.get();
 
         if (in.peek() != '(')
         {
             in.setstate(std::ios::failbit);
             return in;
         }
+        in.get();
 
-        char openParen;
-        in >> openParen;
-
-        char colon1;
-        in >> colon1;
-        if (colon1 != ':')
+        if (in.peek() != ':')
         {
             in.setstate(std::ios::failbit);
             return in;
         }
+        in.get();
 
         DataStruct input;
         bool key1Read = false;
@@ -59,10 +53,11 @@ namespace nspace
 
         while (in && (!key1Read || !key2Read || !key3Read))
         {
-            while (isspace(in.peek())) in.get();
-
             std::string label;
-            in >> label;
+            while (std::isalpha(in.peek()))
+            {
+                label += in.get();
+            }
 
             if (label != "key1" && label != "key2" && label != "key3")
             {
@@ -70,34 +65,30 @@ namespace nspace
                 return in;
             }
 
-            while (isspace(in.peek())) in.get();
-
-            char colon;
-            in >> colon;
-            if (colon != ':')
+            if (in.peek() != ':')
             {
                 in.setstate(std::ios::failbit);
                 return in;
             }
+            in.get();
 
-            while (isspace(in.peek())) in.get();
+            if (std::isspace(in.peek())) in.get();
 
-            if (label == "key1" && !key1Read)
+            if (label == "key1")
             {
-                char c;
-                in >> c;
-                if (c != '0')
+                if (in.peek() != '0')
                 {
                     in.setstate(std::ios::failbit);
                     return in;
                 }
+                in.get();
 
-                in >> c;
-                if (c != 'x' && c != 'X')
+                if (in.peek() != 'x' && in.peek() != 'X')
                 {
                     in.setstate(std::ios::failbit);
                     return in;
                 }
+                in.get();
 
                 in >> std::hex >> input.key1;
                 if (in)
@@ -105,66 +96,65 @@ namespace nspace
                 else
                     return in;
             }
-            else if (label == "key2" && !key2Read)
+            else if (label == "key2")
             {
-                char hash, c;
-                in >> hash >> c;
-                if (hash != '#' || c != 'c')
+                if (in.peek() != '#')
                 {
                     in.setstate(std::ios::failbit);
                     return in;
                 }
+                in.get();
 
-                char openParen2;
-                in >> openParen2;
-                if (openParen2 != '(')
+                if (in.peek() != 'c')
                 {
                     in.setstate(std::ios::failbit);
                     return in;
                 }
+                in.get();
+
+                if (in.peek() != '(')
+                {
+                    in.setstate(std::ios::failbit);
+                    return in;
+                }
+                in.get();
 
                 double real, imag;
                 in >> real >> imag;
 
-                char closeParen2;
-                in >> closeParen2;
-                if (closeParen2 != ')')
+                if (in.peek() != ')')
                 {
                     in.setstate(std::ios::failbit);
                     return in;
                 }
+                in.get();
 
                 input.key2 = std::complex<double>(real, imag);
                 key2Read = true;
             }
-            else if (label == "key3" && !key3Read)
+            else if (label == "key3")
             {
-                char quote;
-                in >> quote;
-                if (quote != '"')
+                if (in.peek() != '"')
                 {
                     in.setstate(std::ios::failbit);
                     return in;
                 }
+                in.get();
+
                 std::getline(in, input.key3, '"');
                 key3Read = true;
             }
-            else
-            {
-                in.setstate(std::ios::failbit);
-                return in;
-            }
 
-            while (isspace(in.peek())) in.get();
+            if (std::isspace(in.peek())) in.get();
 
-            char next;
-            in >> next;
-            if (next == ':')
+            if (in.peek() == ':')
             {
+                in.get();
                 continue;
             }
-            else if (next == ')')
+            else if (in.peek() == ')')
             {
+                in.get();
                 break;
             }
             else
@@ -190,8 +180,6 @@ namespace nspace
     {
         std::ostream::sentry sentry(out);
         if (!sentry) return out;
-
-        iofmtguard fmtguard(out);
 
         out << "(:";
         out << "key1 0x" << std::hex << std::uppercase << src.key1 << ":";
