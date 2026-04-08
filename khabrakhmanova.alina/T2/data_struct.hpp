@@ -4,19 +4,19 @@
 #include <iostream>
 #include <string>
 #include <complex>
+#include "io_types.hpp"
+#include "iofmtguard.hpp"
 
-namespace nspace
-{
-    struct DataStruct
-    {
-        unsigned long long key1;           // ULL HEX
-        std::complex<double> key2;         // CMP LSP
-        std::string key3;
-    };
+struct DataStruct {
+    unsigned long long key1;
+    std::complex<double> key2;
+    std::string key3;
+};
 
-    bool compareData(const DataStruct& a, const DataStruct& b);
-    std::istream& operator>>(std::istream& in, DataStruct& dest);
-    std::ostream& operator<<(std::ostream& out, const DataStruct& src);
-}
+std::istream& operator>>(std::istream& in, DataStruct& dest);
+std::ostream& operator<<(std::ostream& out, const DataStruct& src);
+bool parseFromString(const std::string& line, DataStruct& dest);
+std::string formatHexULL(unsigned long long value);
+std::string formatComplex(const std::complex<double>& value);
 
 #endif

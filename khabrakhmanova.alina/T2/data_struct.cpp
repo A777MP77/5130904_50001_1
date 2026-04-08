@@ -1,193 +1,113 @@
 #include "data_struct.hpp"
-#include <cmath>
+#include <sstream>
 #include <iomanip>
-#include <algorithm>
+#include <cmath>
+#include <vector>
 #include <cctype>
+#include <algorithm>
 
-namespace nspace
-{
-    bool compareData(const DataStruct& a, const DataStruct& b)
-    {
-        if (a.key1 != b.key1)
-        {
-            return a.key1 < b.key1;
-        }
+std::string formatHexULL(unsigned long long value) {
+    std::ostringstream oss;
+    oss << "0x" << std::hex << std::uppercase << value;
+    return oss.str();
+}
 
-        double modA = std::abs(a.key2);
-        double modB = std::abs(b.key2);
+std::string formatComplex(const std::complex<double>& value) {
+    std::ostringstream oss;
+    oss << "#c(" << std::fixed << std::setprecision(1)
+        << value.real() << " " << value.imag() << ")";
+    return oss.str();
+}
 
-        const double epsilon = 1e-10;
-        if (std::abs(modA - modB) > epsilon)
-        {
-            return modA < modB;
-        }
-
-        return a.key3.length() < b.key3.length();
+bool parseFromString(const std::string& line, DataStruct& dest) {
+    if (line.empty() || line.front() != '(' || line.back() != ')') {
+        return false;
     }
 
-    std::istream& operator>>(std::istream& in, DataStruct& dest)
-    {
-        std::istream::sentry sentry(in);
-        if (!sentry) return in;
+    std::string content = line.substr(1, line.size() - 2);
+    std::vector<std::string> tokens;
+    std::string current;
+    bool inQuotes = false;
 
-        while (std::isspace(in.peek())) in.get();
-
-        if (in.peek() != '(')
-        {
-            in.setstate(std::ios::failbit);
-            return in;
+    for (char c : content) {
+        if (c == '"') {
+            inQuotes = !inQuotes;
+            current += c;
+            continue;
         }
-        in.get();
-
-        if (in.peek() != ':')
-        {
-            in.setstate(std::ios::failbit);
-            return in;
+        if (!inQuotes && c == ':') {
+            if (!current.empty()) {
+                tokens.push_back(current);
+                current.clear();
+            }
+            continue;
         }
-        in.get();
-
-        DataStruct input;
-        bool key1Read = false;
-        bool key2Read = false;
-        bool key3Read = false;
-
-        while (in && (!key1Read || !key2Read || !key3Read))
-        {
-            std::string label;
-            while (std::isalpha(in.peek()))
-            {
-                label += in.get();
-            }
-
-            if (label != "key1" && label != "key2" && label != "key3")
-            {
-                in.setstate(std::ios::failbit);
-                return in;
-            }
-
-            if (in.peek() != ':')
-            {
-                in.setstate(std::ios::failbit);
-                return in;
-            }
-            in.get();
-
-            if (std::isspace(in.peek())) in.get();
-
-            if (label == "key1")
-            {
-                if (in.peek() != '0')
-                {
-                    in.setstate(std::ios::failbit);
-                    return in;
-                }
-                in.get();
-
-                if (in.peek() != 'x' && in.peek() != 'X')
-                {
-                    in.setstate(std::ios::failbit);
-                    return in;
-                }
-                in.get();
-
-                in >> std::hex >> input.key1;
-                if (in)
-                    key1Read = true;
-                else
-                    return in;
-            }
-            else if (label == "key2")
-            {
-                if (in.peek() != '#')
-                {
-                    in.setstate(std::ios::failbit);
-                    return in;
-                }
-                in.get();
-
-                if (in.peek() != 'c')
-                {
-                    in.setstate(std::ios::failbit);
-                    return in;
-                }
-                in.get();
-
-                if (in.peek() != '(')
-                {
-                    in.setstate(std::ios::failbit);
-                    return in;
-                }
-                in.get();
-
-                double real, imag;
-                in >> real >> imag;
-
-                if (in.peek() != ')')
-                {
-                    in.setstate(std::ios::failbit);
-                    return in;
-                }
-                in.get();
-
-                input.key2 = std::complex<double>(real, imag);
-                key2Read = true;
-            }
-            else if (label == "key3")
-            {
-                if (in.peek() != '"')
-                {
-                    in.setstate(std::ios::failbit);
-                    return in;
-                }
-                in.get();
-
-                std::getline(in, input.key3, '"');
-                key3Read = true;
-            }
-
-            if (std::isspace(in.peek())) in.get();
-
-            if (in.peek() == ':')
-            {
-                in.get();
-                continue;
-            }
-            else if (in.peek() == ')')
-            {
-                in.get();
-                break;
-            }
-            else
-            {
-                in.setstate(std::ios::failbit);
-                return in;
-            }
-        }
-
-        if (key1Read && key2Read && key3Read)
-        {
-            dest = input;
-        }
-        else
-        {
-            in.setstate(std::ios::failbit);
-        }
-
-        return in;
+        current += c;
+    }
+    if (!current.empty()) {
+        tokens.push_back(current);
     }
 
-    std::ostream& operator<<(std::ostream& out, const DataStruct& src)
-    {
-        std::ostream::sentry sentry(out);
-        if (!sentry) return out;
+    DataStruct temp;
+    bool hasKey1 = false, hasKey2 = false, hasKey3 = false;
 
-        out << "(:";
-        out << "key1 0x" << std::hex << std::uppercase << src.key1 << ":";
-        out << "key2 #c(" << std::fixed << std::setprecision(1)
-            << src.key2.real() << " " << src.key2.imag() << "):";
-        out << "key3 \"" << src.key3 << "\":";
-        out << ")";
+    for (const auto& token : tokens) {
+        size_t spacePos = token.find_first_of(" \t");
+        if (spacePos == std::string::npos) {
+            continue;
+        }
+        std::string key = token.substr(0, spacePos);
+        std::string value = token.substr(spacePos + 1);
 
+        if (key == "key1") {
+            std::istringstream iss(value);
+            if (iss >> ULLHexIO{ temp.key1 }) {
+                hasKey1 = true;
+            }
+        } else if (key == "key2") {
+            std::istringstream iss(value);
+            if (iss >> ComplexIO{ temp.key2 }) {
+                hasKey2 = true;
+            }
+        } else if (key == "key3") {
+            std::istringstream iss(value);
+            if (iss >> StringIO{ temp.key3 }) {
+                hasKey3 = true;
+            }
+        }
+    }
+
+    if (hasKey1 && hasKey2 && hasKey3) {
+        dest = std::move(temp);
+        return true;
+    }
+    return false;
+}
+
+std::istream& operator>>(std::istream& in, DataStruct& dest) {
+    std::string line = "";
+    while (std::getline(in, line)) {
+        size_t start = line.find_first_not_of(" \t");
+        if (start != std::string::npos) {
+            size_t end = line.find_last_not_of(" \t");
+            line = line.substr(start, end - start + 1);
+        }
+        if (parseFromString(line, dest)) {
+            return in;
+        }
+    }
+    in.setstate(std::ios::failbit);
+    return in;
+}
+
+std::ostream& operator<<(std::ostream& out, const DataStruct& src) {
+    std::ostream::sentry sentry(out);
+    if (!sentry) {
         return out;
     }
+    iofmtguard fmtguard(out);
+    out << "(:key1 " << formatHexULL(src.key1)
+        << ":key2 " << formatComplex(src.key2)
+        << ":key3 \"" << src.key3 << "\":)";
+    return out;
 }
