@@ -13,7 +13,6 @@ int main()
     std::getline(std::cin, line);
 
     if (line.empty()) {
-        std::cerr << "Invalid Input";
         return EXIT_FAILURE;
     }
 

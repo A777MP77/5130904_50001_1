@@ -5,7 +5,7 @@
 
 std::string formatLongLongLit(long long value)
 {
-  return std::to_string(value) + "LL";
+  return std::to_string(value) + "ll";
 }
 
 std::string formatRational(const std::pair<long long, unsigned long long>& value)
