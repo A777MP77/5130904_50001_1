@@ -18,40 +18,30 @@ static std::string extractValue(const std::string& str, const std::string& key) 
     if (pos == std::string::npos) return "";
     pos += search.length();
     size_t end = str.find(':', pos);
-    if (end == std::string::npos) return "";
+    if (end == std::string::npos) end = str.length();
     return trim(str.substr(pos, end - pos));
 }
 
 std::istream& operator>>(std::istream& in, DataStruct& data) {
-    // Пропускаем пробелы и читаем символ '('
-    char ch;
-    in >> ch;
-    if (ch != '(') {
+    std::string line;
+    if (!std::getline(in, line)) {
         in.setstate(std::ios::failbit);
         return in;
     }
-    in >> ch;
-    if (ch != ':') {
+    // Удаляем возможные скобки в начале и конце
+    line = trim(line);
+    if (line.empty()) {
         in.setstate(std::ios::failbit);
         return in;
     }
-    // Читаем всё содержимое до ')'
-    std::string content;
-    std::getline(in, content, ')');
-    if (!in) {
-        in.setstate(std::ios::failbit);
-        return in;
+    // Если строка начинается с '(' и заканчивается ')', удаляем их
+    if (line.front() == '(' && line.back() == ')') {
+        line = line.substr(1, line.size() - 2);
     }
-    // Проверяем, что перед ')' был ':'
-    if (content.empty() || content.back() != ':') {
-        in.setstate(std::ios::failbit);
-        return in;
-    }
-    content.pop_back(); // убираем последний ':'
-
-    std::string key1_str = extractValue(content, "key1");
-    std::string key2_str = extractValue(content, "key2");
-    std::string key3_str = extractValue(content, "key3");
+    // Теперь ищем поля
+    std::string key1_str = extractValue(line, "key1");
+    std::string key2_str = extractValue(line, "key2");
+    std::string key3_str = extractValue(line, "key3");
 
     if (key1_str.empty() || key2_str.empty() || key3_str.empty()) {
         in.setstate(std::ios::failbit);
@@ -59,8 +49,8 @@ std::istream& operator>>(std::istream& in, DataStruct& data) {
     }
 
     // Парсим key1 (SLL LIT)
-    // Удаляем суффикс LL, если есть
     std::string k1 = key1_str;
+    // Удаляем суффикс LL, если есть
     if (k1.size() >= 2 && k1.back() == 'L' && k1[k1.size()-2] == 'L') {
         k1.pop_back();
         k1.pop_back();
@@ -72,7 +62,7 @@ std::istream& operator>>(std::istream& in, DataStruct& data) {
         return in;
     }
 
-    // Парсим key2 (CMP LSP) формат: #c(real imag)
+    // Парсим key2 (CMP LSP): #c(real imag)
     if (key2_str.size() < 5 || key2_str.substr(0,3) != "#c(" || key2_str.back() != ')') {
         in.setstate(std::ios::failbit);
         return in;
@@ -86,7 +76,7 @@ std::istream& operator>>(std::istream& in, DataStruct& data) {
     }
     data.key2 = std::complex<double>(real, imag);
 
-    // Парсим key3
+    // Парсим key3 (строка в кавычках)
     if (key3_str.size() < 2 || key3_str.front() != '"' || key3_str.back() != '"') {
         in.setstate(std::ios::failbit);
         return in;
