@@ -28,17 +28,20 @@ std::istream& operator>>(std::istream& in, DataStruct& data) {
         in.setstate(std::ios::failbit);
         return in;
     }
-    // Удаляем возможные скобки в начале и конце
     line = trim(line);
     if (line.empty()) {
         in.setstate(std::ios::failbit);
         return in;
     }
-    // Если строка начинается с '(' и заканчивается ')', удаляем их
-    if (line.front() == '(' && line.back() == ')') {
+    // Удаляем внешние скобки, если они есть
+    if (line.size() >= 2 && line.front() == '(' && line.back() == ')') {
         line = line.substr(1, line.size() - 2);
+        line = trim(line);
+        if (line.empty()) {
+            in.setstate(std::ios::failbit);
+            return in;
+        }
     }
-    // Теперь ищем поля
     std::string key1_str = extractValue(line, "key1");
     std::string key2_str = extractValue(line, "key2");
     std::string key3_str = extractValue(line, "key3");
@@ -48,9 +51,8 @@ std::istream& operator>>(std::istream& in, DataStruct& data) {
         return in;
     }
 
-    // Парсим key1 (SLL LIT)
+    // Парсинг key1 (long long)
     std::string k1 = key1_str;
-    // Удаляем суффикс LL, если есть
     if (k1.size() >= 2 && k1.back() == 'L' && k1[k1.size()-2] == 'L') {
         k1.pop_back();
         k1.pop_back();
@@ -62,7 +64,7 @@ std::istream& operator>>(std::istream& in, DataStruct& data) {
         return in;
     }
 
-    // Парсим key2 (CMP LSP): #c(real imag)
+    // Парсинг key2 (complex<double>)
     if (key2_str.size() < 5 || key2_str.substr(0,3) != "#c(" || key2_str.back() != ')') {
         in.setstate(std::ios::failbit);
         return in;
@@ -76,7 +78,7 @@ std::istream& operator>>(std::istream& in, DataStruct& data) {
     }
     data.key2 = std::complex<double>(real, imag);
 
-    // Парсим key3 (строка в кавычках)
+    // Парсинг key3 (string)
     if (key3_str.size() < 2 || key3_str.front() != '"' || key3_str.back() != '"') {
         in.setstate(std::ios::failbit);
         return in;
