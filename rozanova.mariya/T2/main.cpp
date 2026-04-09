@@ -12,20 +12,12 @@ int main()
 
     std::vector<DataStruct> data;
 
-    while (std::cin)
-    {
-        DataStruct ds;
-        if (std::cin >> ds)
-        {
-            data.push_back(ds);
-        }
-        else
-        {
-            std::cin.clear();
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        }
-    }
-
+    std::copy(
+        std::istream_iterator<DataStruct>(std::cin),
+        std::istream_iterator<DataStruct>(),
+        std::back_inserter(data)
+    );
+    
     std::sort(data.begin(), data.end(),
         [](const DataStruct& a, const DataStruct& b)
         {

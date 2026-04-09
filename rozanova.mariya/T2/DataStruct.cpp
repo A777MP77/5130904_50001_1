@@ -1,6 +1,5 @@
 #include "DataStruct.h"
 #include <iomanip>
-#include <limits>
 
 namespace nspace
 {
@@ -29,7 +28,7 @@ namespace nspace
         return in;
     }
 
-    // Чтение восьмеричного числа
+    // Чтение восьмеричного числа (формат: 076, 01001)
     std::istream& operator>>(std::istream& in, OctIO&& dest)
     {
         std::istream::sentry sentry(in);
@@ -54,23 +53,15 @@ namespace nspace
 
         if (token.size() >= 1 && token[0] == '0')
         {
-            bool valid = true;
             for (char ch : token)
             {
                 if (ch < '0' || ch > '7')
                 {
-                    valid = false;
-                    break;
+                    in.setstate(std::ios::failbit);
+                    return in;
                 }
             }
-            if (valid && token.size() > 1)
-            {
-                dest.ref = std::stoull(token, nullptr, 8);
-            }
-            else
-            {
-                in.setstate(std::ios::failbit);
-            }
+            dest.ref = std::stoull(token, nullptr, 8);
         }
         else
         {
@@ -80,6 +71,7 @@ namespace nspace
         return in;
     }
 
+    // Чтение комплексного числа
     std::istream& operator>>(std::istream& in, ComplexIO&& dest)
     {
         std::istream::sentry sentry(in);
@@ -164,7 +156,9 @@ namespace nspace
             if (!in) return in;
         }
 
+        // Читаем двоеточие перед закрывающей скобкой
         in >> DelimiterIO{ ':' };
+        // Читаем закрывающую скобку
         in >> DelimiterIO{ ')' };
 
         if (key1_read && key2_read && key3_read)
