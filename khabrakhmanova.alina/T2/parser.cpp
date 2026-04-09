@@ -4,7 +4,6 @@
 #include <cctype>
 #include <string>
 #include <vector>
-#include <sstream>
 #include <complex>
 #include <cmath>
 
@@ -17,6 +16,45 @@ static std::string trimString(const std::string& str)
     }
     std::size_t end = str.find_last_not_of(" \t\n\r\f\v");
     return str.substr(start, end - start + 1);
+}
+
+// Разбивает строку на токены по двоеточиям, но не внутри кавычек
+static std::vector<std::string> splitByColonOutsideQuotes(const std::string& str)
+{
+    std::vector<std::string> tokens;
+    bool insideQuotes = false;
+    std::size_t start = 0;
+
+    for (std::size_t i = 0; i < str.length(); ++i)
+    {
+        if (str[i] == '"')
+        {
+            insideQuotes = !insideQuotes;
+        }
+        else if (str[i] == ':' && !insideQuotes)
+        {
+            if (i > start)
+            {
+                std::string token = trimString(str.substr(start, i - start));
+                if (!token.empty())
+                {
+                    tokens.push_back(token);
+                }
+            }
+            start = i + 1;
+        }
+    }
+
+    if (start < str.length())
+    {
+        std::string token = trimString(str.substr(start));
+        if (!token.empty())
+        {
+            tokens.push_back(token);
+        }
+    }
+
+    return tokens;
 }
 
 unsigned long long parseUllLiteral(const std::string& valueText)
@@ -114,31 +152,8 @@ bool parseRecordString(const std::string& recordStr, DataStruct& data)
 
     std::string inner = recordStr.substr(openPos + 2, closePos - openPos - 2);
 
-    std::vector<std::string> tokens;
-    std::size_t start = 0;
-    std::size_t colonPos;
-
-    while ((colonPos = inner.find(':', start)) != std::string::npos)
-    {
-        if (colonPos > start)
-        {
-            std::string token = trimString(inner.substr(start, colonPos - start));
-            if (!token.empty())
-            {
-                tokens.push_back(token);
-            }
-        }
-        start = colonPos + 1;
-    }
-
-    if (start < inner.length())
-    {
-        std::string token = trimString(inner.substr(start));
-        if (!token.empty())
-        {
-            tokens.push_back(token);
-        }
-    }
+    // Используем новую функцию, которая не режет по двоеточиям внутри кавычек
+    std::vector<std::string> tokens = splitByColonOutsideQuotes(inner);
 
     std::string key1Val, key2Val, key3Val;
     bool found1 = false, found2 = false, found3 = false;

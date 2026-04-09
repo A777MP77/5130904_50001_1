@@ -5,11 +5,13 @@
 
 bool compareData(const DataStruct& left, const DataStruct& right)
 {
+    // 1. По возрастанию key1
     if (left.key1 != right.key1)
     {
         return left.key1 < right.key1;
     }
 
+    // 2. По модулю key2
     double leftMod = std::abs(left.key2);
     double rightMod = std::abs(right.key2);
     if (leftMod != rightMod)
@@ -17,6 +19,7 @@ bool compareData(const DataStruct& left, const DataStruct& right)
         return leftMod < rightMod;
     }
 
+    // 3. По длине строки key3
     return left.key3.length() < right.key3.length();
 }
 
