@@ -15,47 +15,58 @@ struct DataStruct
 
 bool parseLine(const std::string &input, DataStruct &out)
 {
+  if (input.empty())
+    return false;
   std::string s = input;
-  if (s.size() < 4 || s.front() != '(' || s.back() != ')')
+
+  if (s.size() < 6 || s.substr(0, 2) != "(:" || s.substr(s.size() - 2) != ":)")
     return false;
 
-  std::size_t i = 0;
-  if (s[i++] != '(' || s[i++] != ':')
-    return false;
-
+  std::size_t i = 2;
   bool has1 = false, has2 = false, has3 = false;
 
-  while (i < s.size())
+  unsigned long long t1 = 0;
+  char t2 = 0;
+  std::string t3 = "";
+
+  while (i < s.size() - 2)
   {
-    std::size_t sp = s.find(' ', i);
-    if (sp == std::string::npos)
+    while (i < s.size() - 2 && std::isspace(static_cast<unsigned char>(s[i])))
+      i++;
+    if (i >= s.size() - 2)
       break;
-    std::string name = s.substr(i, sp - i);
-    i = sp + 1;
+
+    std::size_t start = i;
+    while (i < s.size() - 2 && std::isalnum(static_cast<unsigned char>(s[i])))
+      i++;
+    std::string name = s.substr(start, i - start);
+
+    if (i < s.size() && s[i] == ' ')
+      i++;
+    else
+      return false;
 
     if (name == "key1")
     {
       if (has1)
         return false;
-      std::size_t col = s.find(':', i);
-      if (col == std::string::npos)
+      std::size_t nextCol = s.find(':', i);
+      if (nextCol == std::string::npos)
         return false;
-      std::string tok = s.substr(i, col - i);
-
+      std::string tok = s.substr(i, nextCol - i);
       try
       {
         std::size_t pos = 0;
-        unsigned long long v = std::stoull(tok, &pos, 8);
+        t1 = std::stoull(tok, &pos, 8);
         if (pos != tok.size())
           return false;
-        out.key1 = v;
         has1 = true;
       }
       catch (...)
       {
         return false;
       }
-      i = col + 1;
+      i = nextCol;
     }
     else if (name == "key2")
     {
@@ -63,12 +74,8 @@ bool parseLine(const std::string &input, DataStruct &out)
         return false;
       if (i + 2 >= s.size() || s[i] != '\'' || s[i + 2] != '\'')
         return false;
-      out.key2 = s[i + 1];
+      t2 = s[i + 1];
       i += 3;
-      if (i < s.size() && s[i] == ':')
-        i++;
-      else
-        return false;
       has2 = true;
     }
     else if (name == "key3")
@@ -80,53 +87,51 @@ bool parseLine(const std::string &input, DataStruct &out)
       std::size_t endq = s.find('"', i + 1);
       if (endq == std::string::npos)
         return false;
-      out.key3 = s.substr(i + 1, endq - i - 1);
+      t3 = s.substr(i + 1, endq - i - 1);
       i = endq + 1;
-      if (i < s.size() && s[i] == ':')
-        i++;
-      else
-        return false;
       has3 = true;
     }
     else
       return false;
 
-    if (i < s.size() && s[i] == ')')
-    {
+    if (i < s.size() && s[i] == ':')
       i++;
-      break;
-    }
+    else
+      return false;
   }
 
-  return (has1 && has2 && has3);
+  if (has1 && has2 && has3)
+  {
+    out.key1 = t1;
+    out.key2 = t2;
+    out.key3 = t3;
+    return true;
+  }
+  return false;
 }
 
 std::istream &operator>>(std::istream &in, DataStruct &v)
 {
+  std::istream::sentry sentry(in);
+  if (!sentry)
+    return in;
   std::string line;
-  while (std::getline(in, line))
+  if (std::getline(in, line))
   {
-    DataStruct tmp{};
-    if (parseLine(line, tmp))
+    if (!parseLine(line, v))
     {
-      v = tmp;
-      return in;
+      in.setstate(std::ios::failbit);
     }
   }
-
-  in.setstate(std::ios::failbit);
   return in;
 }
 
 std::ostream &operator<<(std::ostream &os, const DataStruct &v)
 {
-  os << "(:key1 ";
-
-  std::ios::fmtflags f = os.flags();
-  os << std::showbase << std::oct << v.key1;
-  os.flags(f);
-
-  os << ":key2 '" << v.key2 << "':key3 \"" << v.key3 << "\":)";
+  std::ostream::sentry sentry(os);
+  if (!sentry)
+    return os;
+  os << "(:key1 0" << std::oct << v.key1 << ":key2 '" << v.key2 << "':key3 \"" << v.key3 << "\":)";
   return os;
 }
 
@@ -148,22 +153,19 @@ int main()
   std::cout.imbue(std::locale::classic());
 
   std::vector<DataStruct> data;
-  bool hadInput = false;
 
-  std::string line;
-  while (std::getline(std::cin, line))
-  {
-    hadInput = true;
-    DataStruct tmp{};
-    if (parseLine(line, tmp))
-    {
-      data.push_back(tmp);
-    }
-  }
+  std::cin >> std::ws;
+  bool hadInput = (std::cin.peek() != EOF);
+  std::cin.clear();
+
+  std::copy(
+      std::istream_iterator<DataStruct>(std::cin),
+      std::istream_iterator<DataStruct>(),
+      std::back_inserter(data));
 
   if (data.empty())
   {
-    if (std::cin.eof())
+    if (!hadInput)
     {
       std::cout << "Looks like there is no supported record. Cannot determine input. Test skipped\n";
     }
@@ -176,10 +178,10 @@ int main()
 
   std::sort(data.begin(), data.end(), DataLess{});
 
-  for (const auto &d : data)
-  {
-    std::cout << d << "\n";
-  }
+  std::copy(
+      data.begin(),
+      data.end(),
+      std::ostream_iterator<DataStruct>(std::cout, "\n"));
 
   return 0;
 }
