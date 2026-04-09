@@ -56,22 +56,16 @@ std::istream& operator>>(std::istream& in, ComplexIO&& dest) {
         throw std::runtime_error("Invalid complex");
     }
     std::string content = token.substr(3, token.size() - 4);
-    size_t spacePos = content.find_first_of(" \t");
-    if (spacePos == std::string::npos) {
+
+    // Парсим через stringstream для поддержки отрицательных чисел
+    std::stringstream ss(content);
+    double real, imag;
+    if (!(ss >> real >> imag)) {
         in.setstate(std::ios::failbit);
-        throw std::runtime_error("Invalid complex format");
+        throw std::runtime_error("Failed to parse complex");
     }
-    std::string realStr = content.substr(0, spacePos);
-    std::string imagStr = content.substr(spacePos + 1);
-    try {
-        double real = std::stod(realStr);
-        double imag = std::stod(imagStr);
-        dest.ref = std::complex<double>(real, imag);
-        return in;
-    } catch (...) {
-        in.setstate(std::ios::failbit);
-        throw std::runtime_error("Conversion failed");
-    }
+    dest.ref = std::complex<double>(real, imag);
+    return in;
 }
 
 std::istream& operator>>(std::istream& in, StringIO&& dest) {
@@ -80,4 +74,17 @@ std::istream& operator>>(std::istream& in, StringIO&& dest) {
         return in;
     }
     return std::getline(in >> DelimiterIO{ '"' }, dest.ref, '"');
+}
+
+std::istream& operator>>(std::istream& in, LabelIO&& dest) {
+    std::istream::sentry sentry(in);
+    if (!sentry) {
+        return in;
+    }
+    std::string label;
+    if ((in >> StringIO{ label }) && label != dest.exp) {
+        in.setstate(std::ios::failbit);
+        throw std::runtime_error("Label mismatch");
+    }
+    return in;
 }
