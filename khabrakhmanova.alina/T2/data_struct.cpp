@@ -41,7 +41,7 @@ std::istream& operator>>(std::istream& in, DataStruct& dest) {
 
         std::string hex_str;
         size_t i = hex_pos + 2;
-        while (i < line.size() && std::isxdigit(line[i])) {
+        while (i < line.size() && std::isxdigit(static_cast<unsigned char>(line[i]))) {
             hex_str += line[i];
             i++;
         }
@@ -62,6 +62,8 @@ std::istream& operator>>(std::istream& in, DataStruct& dest) {
         }
 
         size_t open_paren = complex_pos + 3;
+
+        // Ищем закрывающую скобку
         size_t close_paren = line.find(")", open_paren);
         if (close_paren == std::string::npos) {
             throw std::runtime_error(") not found");
@@ -69,20 +71,30 @@ std::istream& operator>>(std::istream& in, DataStruct& dest) {
 
         std::string complex_content = line.substr(open_paren, close_paren - open_paren);
 
-        // Парсим real и imag - они могут быть любыми числами
+        // Парсим real и imag - могут быть с минусом
         std::string real_str, imag_str;
-        size_t space_pos = complex_content.find(' ');
-        if (space_pos == std::string::npos) {
-            throw std::runtime_error("Space not found");
+        bool reading_real = true;
+        for (char c : complex_content) {
+            if (c == ' ' && reading_real) {
+                reading_real = false;
+                continue;
+            }
+            if (reading_real) {
+                real_str += c;
+            } else {
+                imag_str += c;
+            }
         }
-        real_str = complex_content.substr(0, space_pos);
-        imag_str = complex_content.substr(space_pos + 1);
 
-        // Удаляем лишние пробелы
-        while (!real_str.empty() && std::isspace(real_str.front())) real_str.erase(0, 1);
-        while (!real_str.empty() && std::isspace(real_str.back())) real_str.pop_back();
-        while (!imag_str.empty() && std::isspace(imag_str.front())) imag_str.erase(0, 1);
-        while (!imag_str.empty() && std::isspace(imag_str.back())) imag_str.pop_back();
+        // Удаляем пробелы
+        while (!real_str.empty() && std::isspace(static_cast<unsigned char>(real_str.front()))) real_str.erase(0, 1);
+        while (!real_str.empty() && std::isspace(static_cast<unsigned char>(real_str.back()))) real_str.pop_back();
+        while (!imag_str.empty() && std::isspace(static_cast<unsigned char>(imag_str.front()))) imag_str.erase(0, 1);
+        while (!imag_str.empty() && std::isspace(static_cast<unsigned char>(imag_str.back()))) imag_str.pop_back();
+
+        if (real_str.empty() || imag_str.empty()) {
+            throw std::runtime_error("Empty real or imag");
+        }
 
         double real = std::stod(real_str);
         double imag = std::stod(imag_str);
