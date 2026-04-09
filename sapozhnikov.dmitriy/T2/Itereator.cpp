@@ -99,7 +99,6 @@ std::istream& operator>>(std::istream& in, DataStruct& v)
   return in;
 }
 
-
 std::ostream& operator<<(std::ostream& os, const DataStruct& v)
 {
   os << "(:key1 ";
