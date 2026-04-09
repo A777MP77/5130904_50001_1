@@ -5,6 +5,7 @@
 #include <locale>
 #include <string>
 #include <vector>
+#include <sstream>
 
 struct DataStruct
 {
@@ -13,119 +14,55 @@ struct DataStruct
   std::string key3;
 };
 
-
-
 bool parseLine(const std::string& input, DataStruct& out)
 {
-  std::string s = input;
+   if (input.empty()) return false;
+   
+   std::string s = input;
+   if (s.size() < 4 || s.front() != '(' || s.back() != ')') return false;
+   
+   std::string content = s.substr(2, s.size() - 4); 
+   std::stringstream ss(content);
+   std::string part;
+   
+   bool has1 = false, has2 = false, has3 = false;
 
-  std::size_t i = 0;
+   while (std::getline(ss, part, ':')) {
+      if (part.empty()) continue;
+      
+      std::stringstream ps(part);
+      std::string key;
+      ps >> key;
 
-
-  if (s.size() < 4) return false;
-  if (s[i++] != '(') return false;
-  if (s[i++] != ':') return false;
-
-  bool has1 = false, has2 = false, has3 = false;
-
-  while (true)
-  {
-    std::size_t sp = s.find(' ', i);
-    if (sp == std::string::npos) return false;
-    std::string name = s.substr(i, sp - i);
-
-    i = sp;
-    if (i >= s.size() || s[i] != ' ') return false;
-    ++i;
-
-    if (name == "key1")
-    {
-    if (has1) return false;
-
-
-    std::size_t col = s.find(':', i);
-    if (col == std::string::npos) return false;
-    std::string tok = s.substr(i, col - i);
-
-
-    if (tok.size() > 1)
-    {
-      bool allZero = true;
-      for (char c : tok)
-      {
-        if (c != '0')
-        {
-          allZero = false;
-          break;
-        }
+      if (key == "key1") {
+        std::string val;
+        ps >> val;
+        try {
+           size_t suffix = val.find_first_not_of("0123456789-xXabcdefABCDEF");
+           if (suffix != std::string::npos) val = val.substr(0, suffix);
+           
+           out.key1 = std::stoull(val, nullptr, 0);
+           has1 = true;
+        } catch (...) { return false; }
       }
-      if (allZero) return false;
-    }
+      else if (key == "key2") {
+        char quote, ch, endQuote;
+        if (ps >> quote >> ch >> endQuote && quote == '\'' && endQuote == '\'') {
+           out.key2 = ch;
+           has2 = true;
+        } else return false;
+      }
+      else if (key == "key3") {
+        size_t start = part.find('"');
+        size_t end = part.find('"', start + 1);
+        if (start != std::string::npos && end != std::string::npos) {
+           out.key3 = part.substr(start + 1, end - start - 1);
+           has3 = true;
+        } else return false;
+      }
+   }
 
-
-    try
-    {
-      std::size_t pos = 0;
-      unsigned long long v = std::stoull(tok, &pos, 8);
-      if (pos != tok.size()) return false;
-      out.key1 = v;
-    }
-    catch (...)
-    {
-      return false;
-    }
-
-    i = col;
-    has1 = true;
-    }
-    else if (name == "key2")
-    {
-    if (has2) return false;
-
-
-    if (i + 2 >= s.size()) return false;
-    if (s[i] != '\'') return false;
-    out.key2 = s[i + 1];
-    if (s[i + 2] != '\'') return false;
-    i += 3;
-
-    has2 = true;
-    }
-    else if (name == "key3")
-    {
-    if (has3) return false;
-
-
-    if (i >= s.size() || s[i] != '"') return false;
-    ++i;
-    std::size_t endq = s.find('"', i);
-    if (endq == std::string::npos) return false;
-
-    out.key3 = s.substr(i, endq - i);
-    i = endq + 1;
-
-    has3 = true;
-    }
-    else
-    {
-    return false;
-    }
-
-
-    if (i >= s.size() || s[i] != ':') return false;
-    ++i;
-
-
-    if (i < s.size() && s[i] == ')')
-    {
-    ++i;
-    break;
-    }
-
-  }
-
-
-  return (i == s.size()) && has1 && has2 && has3;
+   return has1 && has2 && has3;
 }
 
 
