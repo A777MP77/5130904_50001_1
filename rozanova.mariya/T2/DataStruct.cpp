@@ -1,5 +1,6 @@
 #include "DataStruct.h"
 #include <iomanip>
+#include <limits>
 
 namespace nspace
 {
@@ -39,7 +40,7 @@ namespace nspace
 
         in >> token;
 
-        if (!in))
+        if (!in)
             return in;
 
         if (token.size() >= 1 && token[0] == '0')
