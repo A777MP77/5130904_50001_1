@@ -46,17 +46,17 @@ std::istream& operator>>(std::istream& in, DataStruct& data) {
         return in;
     }
     content.pop_back(); // убираем последний символ :
-    
+
     // извлекаем значения по ключам
     std::string key1_str = extractValue(content, "key1");
     std::string key2_str = extractValue(content, "key2");
     std::string key3_str = extractValue(content, "key3");
-    
+
     if (key1_str.empty() || key2_str.empty() || key3_str.empty()) {
         in.setstate(std::ios::failbit);
         return in;
     }
-    
+
     // парсим key1
     // удаляю суффикс LL, если есть
     if (key1_str.size() >= 2 && key1_str.back() == 'L' && key1_str[key1_str.size()-2] == 'L') {
@@ -69,7 +69,7 @@ std::istream& operator>>(std::istream& in, DataStruct& data) {
         in.setstate(std::ios::failbit);
         return in;
     }
-    
+
     // парсим key2
     if (key2_str.size() < 5 || key2_str.substr(0,3) != "#c(" || key2_str.back() != ')') {
         in.setstate(std::ios::failbit);
@@ -83,14 +83,14 @@ std::istream& operator>>(std::istream& in, DataStruct& data) {
         return in;
     }
     data.key2 = std::complex<double>(real, imag);
-    
+
     // парсим key3 (строка в кавычках)
     if (key3_str.size() < 2 || key3_str.front() != '"' || key3_str.back() != '"') {
         in.setstate(std::ios::failbit);
         return in;
     }
     data.key3 = key3_str.substr(1, key3_str.size() - 2);
-    
+
     return in;
 }
 
