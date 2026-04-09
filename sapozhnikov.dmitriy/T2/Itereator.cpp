@@ -177,21 +177,38 @@ int main()
   std::cout.imbue(std::locale::classic());
 
   std::vector<DataStruct> data;
+  bool hadInput = false;
 
-  std::copy(
-    std::istream_iterator<DataStruct>(std::cin),
-    std::istream_iterator<DataStruct>(),
-    std::back_inserter(data)
-  );
+  std::string line;
+  while (std::getline(std::cin, line))
+  {
+    hadInput = true;
+    DataStruct tmp{};
+    if (parseLine(line, tmp))
+    {
+    data.push_back(tmp);
+    }
+  }
 
   if (data.empty())
   {
+    if (hadInput)
+    {
+    std::cout << "Looks like there is no supported record. Cannot determine input. Test skipped\n";
+    }
+    else
+    {
     std::cout << "Atleast one supported record type\n";
+    }
     return 0;
   }
 
   std::sort(data.begin(), data.end(), DataLess{});
 
-  std::copy(data.begin(), data.end(),
-    std::ostream_iterator<DataStruct>(std::cout, "\n"));
+  for (const auto& d : data)
+  {
+    std::cout << d << "\n";
+  }
+
+  return 0;
 }
