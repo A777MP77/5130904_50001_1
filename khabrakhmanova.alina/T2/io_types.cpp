@@ -12,7 +12,6 @@ std::istream& operator>>(std::istream& in, DelimiterIO&& dest) {
     in >> c;
     if (in && c != dest.exp) {
         in.setstate(std::ios::failbit);
-        throw std::runtime_error("Delimiter mismatch");
     }
     return in;
 }
@@ -25,19 +24,23 @@ std::istream& operator>>(std::istream& in, ULLHexIO&& dest) {
     std::string token;
     in >> token;
     if (!in) {
-        throw std::runtime_error("Failed to read");
+        return in;
     }
     if (token.size() < 3 || token[0] != '0' || (token[1] != 'x' && token[1] != 'X')) {
         in.setstate(std::ios::failbit);
-        throw std::runtime_error("Invalid hex");
+        return in;
     }
     std::string hexStr = token.substr(2);
+    if (hexStr.empty()) {
+        in.setstate(std::ios::failbit);
+        return in;
+    }
     try {
         dest.ref = std::stoull(hexStr, nullptr, 16);
         return in;
     } catch (...) {
         in.setstate(std::ios::failbit);
-        throw std::runtime_error("Conversion failed");
+        return in;
     }
 }
 
@@ -49,20 +52,18 @@ std::istream& operator>>(std::istream& in, ComplexIO&& dest) {
     std::string token;
     in >> token;
     if (!in) {
-        throw std::runtime_error("Failed to read");
+        return in;
     }
     if (token.size() < 6 || token[0] != '#' || token[1] != 'c' || token[2] != '(') {
         in.setstate(std::ios::failbit);
-        throw std::runtime_error("Invalid complex");
+        return in;
     }
     std::string content = token.substr(3, token.size() - 4);
-
-    // Парсим через stringstream для поддержки отрицательных чисел
     std::stringstream ss(content);
     double real, imag;
     if (!(ss >> real >> imag)) {
         in.setstate(std::ios::failbit);
-        throw std::runtime_error("Failed to parse complex");
+        return in;
     }
     dest.ref = std::complex<double>(real, imag);
     return in;
@@ -84,7 +85,6 @@ std::istream& operator>>(std::istream& in, LabelIO&& dest) {
     std::string label;
     if ((in >> StringIO{ label }) && label != dest.exp) {
         in.setstate(std::ios::failbit);
-        throw std::runtime_error("Label mismatch");
     }
     return in;
 }
