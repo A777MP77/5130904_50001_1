@@ -13,15 +13,17 @@ static std::string trim(const std::string& s) {
     return s.substr(start, end - start + 1);
 }
 
-// Проверка, что строка — целое число в формате SLL LIT
+// Проверка, что строка — целое число в формате SLL LIT (регистронезависимый суффикс ll)
 static bool isInteger(const std::string& s) {
     if (s.empty()) return false;
     size_t i = 0;
     if (s[0] == '-') i = 1;
-    if (i >= s.size() || !std::isdigit(s[i])) return false;
-    while (i < s.size() && std::isdigit(s[i])) ++i;
-    // Разрешаем суффикс LL (необязательно)
-    if (i + 2 == s.size() && s[i] == 'L' && s[i+1] == 'L') i += 2;
+    if (i >= s.size() || !std::isdigit(static_cast<unsigned char>(s[i]))) return false;
+    while (i < s.size() && std::isdigit(static_cast<unsigned char>(s[i]))) ++i;
+    // Разрешаем суффикс LL или ll (без учёта регистра)
+    if (i + 2 == s.size() &&
+        (s[i] == 'L' || s[i] == 'l') &&
+        (s[i+1] == 'L' || s[i+1] == 'l')) i += 2;
     return i == s.size();
 }
 
@@ -33,7 +35,6 @@ static bool isComplex(const std::string& s) {
     std::istringstream iss(inner);
     double r, i;
     if (!(iss >> r >> i)) return false;
-    // Проверяем, что после чисел нет мусора
     char ch;
     if (iss >> ch) return false;
     return true;
@@ -82,9 +83,11 @@ std::istream& operator>>(std::istream& in, DataStruct& data) {
         return in;
     }
 
-    // Парсинг key1
+    // Парсинг key1 (удаляем суффикс ll/LL)
     std::string k1 = key1_str;
-    if (k1.size() >= 2 && k1.back() == 'L' && k1[k1.size()-2] == 'L') {
+    if (k1.size() >= 2 &&
+        (k1.back() == 'L' || k1.back() == 'l') &&
+        (k1[k1.size()-2] == 'L' || k1[k1.size()-2] == 'l')) {
         k1.pop_back();
         k1.pop_back();
     }
