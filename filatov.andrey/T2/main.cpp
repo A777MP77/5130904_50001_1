@@ -3,26 +3,23 @@
 #include <algorithm>
 #include <iterator>
 #include <sstream>
-#include <optional>
 #include "data_struct.h"
 
-std::optional<DataStruct> tryParse(const std::string& line) {
+bool tryParse(const std::string& line, DataStruct& out) {
     std::istringstream iss(line);
-    DataStruct temp;
-    if (iss >> temp) {
-        return temp;
-    }
-    std::cerr << "Failed to parse: " << line << std::endl;
-    return std::nullopt;
+    return !!(iss >> out);
 }
 
 int main() {
     std::vector<DataStruct> vec;
     std::istream_iterator<std::string> in_iter(std::cin), eof;
     std::for_each(in_iter, eof, [&](const std::string& line) {
-        auto opt = tryParse(line);
-        if (opt) {
-            vec.push_back(*opt);
+        DataStruct temp;
+        if (tryParse(line, temp)) {
+            vec.push_back(temp);
+        } else {
+            // Печатаем в stderr для отладки (это появится в логах CI)
+            std::cerr << "Failed to parse: " << line << std::endl;
         }
     });
 
