@@ -1,8 +1,8 @@
+// data_struct.cpp
 #include "data_struct.h"
 #include <sstream>
 #include <iomanip>
 #include <string>
-#include <algorithm>  // для std::transform (tolower)
 
 std::istream& operator>>(std::istream& is, DataStruct& ds) {
     std::string record;
@@ -11,7 +11,10 @@ std::istream& operator>>(std::istream& is, DataStruct& ds) {
         return is;
     }
 
-    if (record.size() < 5 || record.substr(0, 2) != "(:") || record.substr(record.size() - 2) != ":)") {
+    // === Проверка формата записи (: ... :) ===
+    if ((record.size() < 5) ||
+        (record.substr(0, 2) != "(:") ||
+        (record.substr(record.size() - 2) != ":)")) {
         is.setstate(std::ios::failbit);
         return is;
     }
@@ -53,7 +56,7 @@ std::istream& operator>>(std::istream& is, DataStruct& ds) {
         return is;
     }
 
-    // === key1: SLL LIT ===
+    // === key1: SLL LIT (например -123ll или 456LL) ===
     {
         if (v1.size() < 3) {
             is.setstate(std::ios::failbit);
@@ -77,7 +80,7 @@ std::istream& operator>>(std::istream& is, DataStruct& ds) {
         }
     }
 
-    // === key2: CMP LSP ===
+    // === key2: CMP LSP (#c(1.0 -1.0)) ===
     {
         std::string val = v2;
         if (val.size() < 5 || val.substr(0, 3) != "#c(" || val.back() != ')') {
@@ -99,7 +102,7 @@ std::istream& operator>>(std::istream& is, DataStruct& ds) {
         ds.key2 = std::complex<double>(re, im);
     }
 
-    // === key3: строка ===
+    // === key3: строка в кавычках ===
     {
         std::string val = v3;
         if (val.size() < 2 || val.front() != '"' || val.back() != '"') {
