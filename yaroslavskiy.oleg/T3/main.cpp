@@ -11,8 +11,7 @@
 #include <numeric>
 #include <iomanip>
 #include <cmath>
-#include <map>
-#include <cctype>
+#include <set>
 
 using namespace std::placeholders;
 
@@ -24,8 +23,9 @@ struct Point {
         return x == other.x && y == other.y;
     }
 
-    bool operator!=(const Point& other) const {
-        return !(*this == other);
+    bool operator<(const Point& other) const {
+        if (x != other.x) return x < other.x;
+        return y < other.y;
     }
 
 };
@@ -37,26 +37,16 @@ struct Polygon {
     bool operator==(const Polygon& other) const {
         if (points.size() != other.points.size()) return false;
 
-        auto sorted1 = points;
-        auto sorted2 = other.points;
-        std::sort(sorted1.begin(), sorted1.end(),
-            std::bind(std::less<int>(),
-                std::bind(&Point::x, _1),
-                std::bind(&Point::x, _2)));
-        std::sort(sorted2.begin(), sorted2.end(),
-            std::bind(std::less<int>(),
-                std::bind(&Point::x, _1),
-                std::bind(&Point::x, _2)));
+        std::multiset<Point> set1(points.begin(), points.end());
+        std::multiset<Point> set2(other.points.begin(), other.points.end());
 
-        return sorted1 == sorted2;
+        return set1 == set2;
     }
-
 
     bool exactMatch(const Polygon& other) const {
         if (points.size() != other.points.size()) return false;
         return std::equal(points.begin(), points.end(), other.points.begin());
     }
-
 };
 
 double triangleArea(const Point& a, const Point& b, const Point& c) {
@@ -97,6 +87,10 @@ std::vector<Polygon> readPolygons(const std::string& filename) {
             continue;
         }
 
+        if (vertexCount < 3) {
+            continue;
+        }
+
         Polygon poly;
         bool valid = true;
 
@@ -119,7 +113,6 @@ std::vector<Polygon> readPolygons(const std::string& filename) {
     }
 
     return polygons;
-
 }
 
 bool parsePolygon(const std::string& str, Polygon& poly) {
@@ -127,6 +120,8 @@ bool parsePolygon(const std::string& str, Polygon& poly) {
     int vertexCount;
 
     if (!(iss >> vertexCount)) return false;
+
+    if (vertexCount < 3) return false;
 
     poly.points.clear();
 
@@ -143,6 +138,10 @@ bool parsePolygon(const std::string& str, Polygon& poly) {
     }
 
     return poly.points.size() == static_cast<size_t>(vertexCount);
+}
+
+bool isValidVertexCount(int n) {
+    return n >= 3;
 }
 
 void processCommands(std::vector<Polygon>& polygons) {
@@ -171,13 +170,15 @@ void processCommands(std::vector<Polygon>& polygons) {
             }
             else {
                 int vertexCount = std::stoi(param);
+                if (!isValidVertexCount(vertexCount)) {
+                    std::cout << "<INVALID COMMAND>" << std::endl;
+                    continue;
+                }
                 int count = std::count_if(polygons.begin(), polygons.end(),
                     [vertexCount](const Polygon& p) { return p.points.size() == static_cast<size_t>(vertexCount); });
                 std::cout << count << std::endl;
             }
         }
-
-
 
         else if (command == "AREA") {
             std::string param;
@@ -185,7 +186,7 @@ void processCommands(std::vector<Polygon>& polygons) {
 
             if (param == "MEAN") {
                 if (polygons.empty()) {
-                    std::cout << "0.0" << std::endl;
+                    std::cout << "<INVALID COMMAND>" << std::endl;
                 }
                 else {
                     double sum = std::accumulate(polygons.begin(), polygons.end(), 0.0,
@@ -194,6 +195,7 @@ void processCommands(std::vector<Polygon>& polygons) {
                     std::cout << std::fixed << std::setprecision(1) << mean << std::endl;
                 }
             }
+
 
             else if (param == "EVEN") {
                 double sum = std::accumulate(polygons.begin(), polygons.end(), 0.0,
@@ -210,8 +212,11 @@ void processCommands(std::vector<Polygon>& polygons) {
                 std::cout << std::fixed << std::setprecision(1) << sum << std::endl;
             }
             else {
-
                 int vertexCount = std::stoi(param);
+                if (!isValidVertexCount(vertexCount)) {
+                    std::cout << "<INVALID COMMAND>" << std::endl;
+                    continue;
+                }
                 double sum = std::accumulate(polygons.begin(), polygons.end(), 0.0,
                     [vertexCount](double acc, const Polygon& p) {
                         return acc + (p.points.size() == static_cast<size_t>(vertexCount) ? polygonArea(p) : 0.0);
@@ -226,8 +231,7 @@ void processCommands(std::vector<Polygon>& polygons) {
             iss >> param;
 
             if (polygons.empty()) {
-                if (param == "AREA") std::cout << "0.0" << std::endl;
-                else std::cout << "0" << std::endl;
+                std::cout << "<INVALID COMMAND>" << std::endl;
                 continue;
             }
 
@@ -250,13 +254,13 @@ void processCommands(std::vector<Polygon>& polygons) {
             }
         }
 
+
         else if (command == "MIN") {
             std::string param;
             iss >> param;
 
             if (polygons.empty()) {
-                if (param == "AREA") std::cout << "0.0" << std::endl;
-                else std::cout << "0" << std::endl;
+                std::cout << "<INVALID COMMAND>" << std::endl;
                 continue;
             }
 
@@ -333,9 +337,12 @@ void processCommands(std::vector<Polygon>& polygons) {
         else {
             std::cout << "<INVALID COMMAND>" << std::endl;
         }
-    }
-}
 
+    }
+
+
+
+}
 
 int main(int argc, char* argv[]) {
     setlocale(LC_ALL, "Russian");
@@ -352,6 +359,7 @@ int main(int argc, char* argv[]) {
     return EXIT_SUCCESS;
 
 }
+
 
 
 
