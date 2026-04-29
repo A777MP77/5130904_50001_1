@@ -9,7 +9,7 @@ struct Point {
 
 struct Polygon {
     std::vector<Point> points;
-    
+
     double getArea() const;
     int getVertexCount() const;
     bool operator==(const Polygon& other) const;
