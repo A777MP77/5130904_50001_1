@@ -3,8 +3,10 @@
 #include <sstream>
 #include <algorithm>
 #include <iomanip>
+#include <iterator>
 
-void printInvalidCommand() {
+// Вспомогательная функция
+void printInvalid() {
     std::cout << "<INVALID COMMAND>" << std::endl;
 }
 
@@ -14,57 +16,45 @@ void doArea(const std::vector<Polygon>& polys, const std::string& param) {
     double result = 0.0;
 
     if (param == "ODD" || param == "EVEN") {
-        bool needOdd = (param == "ODD");
+        bool isOdd = (param == "ODD");
         for (const auto& p : polys) {
-            if ((p.getVertexCount() % 2 == 1) == needOdd) {
+            if ((p.getVertexCount() % 2 == 1) == isOdd) {
                 result += p.getArea();
             }
         }
     }
     else if (param == "MEAN") {
         if (polys.empty()) {
-            printInvalidCommand();
+            printInvalid();
             return;
         }
         double sum = 0.0;
-        for (const auto& p : polys) {
-            sum += p.getArea();
-        }
+        for (const auto& p : polys) sum += p.getArea();
         result = sum / polys.size();
         std::cout << std::fixed << std::setprecision(1) << result << std::endl;
         return;
     }
     else {
-        // AREA число
         int n = 0;
-        try {
-            n = std::stoi(param);
-        } catch (...) {
-            printInvalidCommand();
-            return;
-        }
+        try { n = std::stoi(param); }
+        catch (...) { printInvalid(); return; }
+
         for (const auto& p : polys) {
-            if (p.getVertexCount() == n) {
-                result += p.getArea();
-            }
+            if (p.getVertexCount() == n) result += p.getArea();
         }
     }
-
     std::cout << std::fixed << std::setprecision(1) << result << std::endl;
 }
 
 void doMax(const std::vector<Polygon>& polys, const std::string& what) {
-    if (polys.empty()) {
-        printInvalidCommand();
-        return;
-    }
+    if (polys.empty()) { printInvalid(); return; }
 
     if (what == "AREA") {
-        double maxA = polys[0].getArea();
+        double maxArea = polys[0].getArea();
         for (const auto& p : polys) {
-            if (p.getArea() > maxA) maxA = p.getArea();
+            if (p.getArea() > maxArea) maxArea = p.getArea();
         }
-        std::cout << std::fixed << std::setprecision(1) << maxA << std::endl;
+        std::cout << std::fixed << std::setprecision(1) << maxArea << std::endl;
     }
     else if (what == "VERTEXES") {
         int maxV = polys[0].getVertexCount();
@@ -73,23 +63,18 @@ void doMax(const std::vector<Polygon>& polys, const std::string& what) {
         }
         std::cout << maxV << std::endl;
     }
-    else {
-        printInvalidCommand();
-    }
+    else printInvalid();
 }
 
 void doMin(const std::vector<Polygon>& polys, const std::string& what) {
-    if (polys.empty()) {
-        printInvalidCommand();
-        return;
-    }
+    if (polys.empty()) { printInvalid(); return; }
 
     if (what == "AREA") {
-        double minA = polys[0].getArea();
+        double minArea = polys[0].getArea();
         for (const auto& p : polys) {
-            if (p.getArea() < minA) minA = p.getArea();
+            if (p.getArea() < minArea) minArea = p.getArea();
         }
-        std::cout << std::fixed << std::setprecision(1) << minA << std::endl;
+        std::cout << std::fixed << std::setprecision(1) << minArea << std::endl;
     }
     else if (what == "VERTEXES") {
         int minV = polys[0].getVertexCount();
@@ -98,57 +83,58 @@ void doMin(const std::vector<Polygon>& polys, const std::string& what) {
         }
         std::cout << minV << std::endl;
     }
-    else {
-        printInvalidCommand();
-    }
+    else printInvalid();
 }
 
 void doCount(const std::vector<Polygon>& polys, const std::string& param) {
     int cnt = 0;
 
     if (param == "EVEN") {
-        for (const auto& p : polys) {
+        for (const auto& p : polys)
             if (p.getVertexCount() % 2 == 0) cnt++;
-        }
     }
     else if (param == "ODD") {
-        for (const auto& p : polys) {
+        for (const auto& p : polys)
             if (p.getVertexCount() % 2 == 1) cnt++;
-        }
     }
     else {
         int n = 0;
-        try {
-            n = std::stoi(param);
-        } catch (...) {
-            printInvalidCommand();
-            return;
-        }
-        for (const auto& p : polys) {
+        try { n = std::stoi(param); }
+        catch (...) { printInvalid(); return; }
+        for (const auto& p : polys)
             if (p.getVertexCount() == n) cnt++;
-        }
     }
     std::cout << cnt << std::endl;
 }
 
-// ====================== ДОПОЛНИТЕЛЬНЫЕ КОМАНДЫ ======================
+// ====================== КОМАНДЫ ВАРИАНТА 9 ======================
 
-void doLessArea(const std::vector<Polygon>& polys, const Polygon& sample) {
-    double sampleArea = sample.getArea();
-    int count = 0;
-    for (const auto& p : polys) {
-        if (p.getArea() < sampleArea) {
-            count++;
+// RMECHO <Polygon> — удаляет идущие подряд дубликаты указанной фигуры
+void doRmecho(std::vector<Polygon>& polys, const Polygon& sample) {
+    if (polys.empty()) {
+        std::cout << 0 << std::endl;
+        return;
+    }
+
+    int removed = 0;
+    auto it = polys.begin();
+
+    while (it != polys.end()) {
+        if (*it == sample) {
+            auto nextIt = std::next(it);
+            while (nextIt != polys.end() && *nextIt == sample) {
+                nextIt = polys.erase(nextIt);
+                removed++;
+            }
+            it = nextIt;
+        } else {
+            ++it;
         }
     }
-    std::cout << count << std::endl;
+
+    std::cout << removed << std::endl;
 }
 
-void doMaxSeq(const std::vector<Polygon>& polys, const Polygon& sample) {
-    int maxLength = 0;
-    int current = 0;
-
-    for (const auto& p : polys) {
-        if (p == sample) {
-            current++;
-            if (current > maxLength) maxLength =
+// INTERSECTIONS <Polygon> — считает, сколько фигур пересекаются с данной
+void doIntersections(const std::vector<Polygon>& polys, const Polygon& sample) {
+    int
