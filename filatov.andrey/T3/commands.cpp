@@ -1,130 +1,103 @@
-cat > filatov.andrey/T3/commands.cpp << 'EOF'
 #include "commands.h"
 #include <iostream>
-#include <sstream>
-#include <algorithm>
 #include <iomanip>
+#include <numeric>
+#include <algorithm>
+#include <functional>
 
-void printInvalid() {
-    std::cout << "<INVALID COMMAND>" << std::endl;
+void processArea(const std::vector<Polygon>& polygons, const std::string& arg) {
+    if (polygons.empty()) { std::cout << "<INVALID COMMAND>" << std::endl; return; }
+    if (arg == "MEAN") {
+        double total = std::accumulate(polygons.begin(), polygons.end(), 0.0,
+            [](double sum, const Polygon& p) { return sum + polygonArea(p); });
+        std::cout << std::fixed << std::setprecision(1) << total / polygons.size() << std::endl;
+    } else if (arg == "EVEN" || arg == "ODD") {
+        bool isEven = (arg == "EVEN");
+        double sum = std::accumulate(polygons.begin(), polygons.end(), 0.0,
+            [isEven](double s, const Polygon& p) {
+                if ((p.points.size() % 2 == 0) == isEven)
+                    return s + polygonArea(p);
+                return s;
+            });
+        std::cout << std::fixed << std::setprecision(1) << sum << std::endl;
+    } else {
+        int vertexCount = std::stoi(arg);
+        double sum = std::accumulate(polygons.begin(), polygons.end(), 0.0,
+            [vertexCount](double s, const Polygon& p) {
+                return s + (p.points.size() == static_cast<size_t>(vertexCount) ? polygonArea(p) : 0.0);
+            });
+        std::cout << std::fixed << std::setprecision(1) << sum << std::endl;
+    }
 }
 
-// ==================== ОБЯЗАТЕЛЬНЫЕ КОМАНДЫ ====================
-
-void doArea(const std::vector<Polygon>& polys, const std::string& param) {
-    double result = 0.0;
-
-    if (param == "ODD" || param == "EVEN") {
-        bool isOdd = (param == "ODD");
-        for (const auto& p : polys) {
-            if ((p.getVertexCount() % 2 == 1) == isOdd) {
-                result += p.getArea();
-            }
-        }
+void processMax(const std::vector<Polygon>& polygons, const std::string& arg) {
+    if (polygons.empty()) { std::cout << "<INVALID COMMAND>" << std::endl; return; }
+    if (arg == "AREA") {
+        auto it = std::max_element(polygons.begin(), polygons.end(),
+            [](const Polygon& a, const Polygon& b) { return polygonArea(a) < polygonArea(b); });
+        std::cout << std::fixed << std::setprecision(1) << polygonArea(*it) << std::endl;
+    } else if (arg == "VERTEXES") {
+        auto it = std::max_element(polygons.begin(), polygons.end(),
+            [](const Polygon& a, const Polygon& b) { return a.points.size() < b.points.size(); });
+        std::cout << it->points.size() << std::endl;
+    } else {
+        std::cout << "<INVALID COMMAND>" << std::endl;
     }
-    else if (param == "MEAN") {
-        if (polys.empty()) {
-            printInvalid();
-            return;
-        }
-        double sum = 0.0;
-        for (const auto& p : polys) sum += p.getArea();
-        result = sum / polys.size();
-        std::cout << std::fixed << std::setprecision(1) << result << std::endl;
-        return;
-    }
-    else {
-        int n = 0;
-        try { n = std::stoi(param); }
-        catch (...) { printInvalid(); return; }
-        for (const auto& p : polys) {
-            if (p.getVertexCount() == n) result += p.getArea();
-        }
-    }
-    std::cout << std::fixed << std::setprecision(1) << result << std::endl;
 }
 
-void doMax(const std::vector<Polygon>& polys, const std::string& what) {
-    if (polys.empty()) { printInvalid(); return; }
-
-    if (what == "AREA") {
-        double maxA = polys[0].getArea();
-        for (const auto& p : polys) if (p.getArea() > maxA) maxA = p.getArea();
-        std::cout << std::fixed << std::setprecision(1) << maxA << std::endl;
+void processMin(const std::vector<Polygon>& polygons, const std::string& arg) {
+    if (polygons.empty()) { std::cout << "<INVALID COMMAND>" << std::endl; return; }
+    if (arg == "AREA") {
+        auto it = std::min_element(polygons.begin(), polygons.end(),
+            [](const Polygon& a, const Polygon& b) { return polygonArea(a) < polygonArea(b); });
+        std::cout << std::fixed << std::setprecision(1) << polygonArea(*it) << std::endl;
+    } else if (arg == "VERTEXES") {
+        auto it = std::min_element(polygons.begin(), polygons.end(),
+            [](const Polygon& a, const Polygon& b) { return a.points.size() < b.points.size(); });
+        std::cout << it->points.size() << std::endl;
+    } else {
+        std::cout << "<INVALID COMMAND>" << std::endl;
     }
-    else if (what == "VERTEXES") {
-        int maxV = polys[0].getVertexCount();
-        for (const auto& p : polys) if (p.getVertexCount() > maxV) maxV = p.getVertexCount();
-        std::cout << maxV << std::endl;
-    }
-    else printInvalid();
 }
 
-void doMin(const std::vector<Polygon>& polys, const std::string& what) {
-    if (polys.empty()) { printInvalid(); return; }
-
-    if (what == "AREA") {
-        double minA = polys[0].getArea();
-        for (const auto& p : polys) if (p.getArea() < minA) minA = p.getArea();
-        std::cout << std::fixed << std::setprecision(1) << minA << std::endl;
+void processCount(const std::vector<Polygon>& polygons, const std::string& arg) {
+    if (arg == "EVEN" || arg == "ODD") {
+        bool isEven = (arg == "EVEN");
+        int cnt = std::count_if(polygons.begin(), polygons.end(),
+            [isEven](const Polygon& p) { return (p.points.size() % 2 == 0) == isEven; });
+        std::cout << cnt << std::endl;
+    } else {
+        int vertexCount = std::stoi(arg);
+        int cnt = std::count_if(polygons.begin(), polygons.end(),
+            [vertexCount](const Polygon& p) { return p.points.size() == static_cast<size_t>(vertexCount); });
+        std::cout << cnt << std::endl;
     }
-    else if (what == "VERTEXES") {
-        int minV = polys[0].getVertexCount();
-        for (const auto& p : polys) if (p.getVertexCount() < minV) minV = p.getVertexCount();
-        std::cout << minV << std::endl;
-    }
-    else printInvalid();
 }
 
-void doCount(const std::vector<Polygon>& polys, const std::string& param) {
-    int cnt = 0;
-    if (param == "EVEN") {
-        for (const auto& p : polys) if (p.getVertexCount() % 2 == 0) cnt++;
-    }
-    else if (param == "ODD") {
-        for (const auto& p : polys) if (p.getVertexCount() % 2 == 1) cnt++;
-    }
-    else {
-        int n = 0;
-        try { n = std::stoi(param); }
-        catch (...) { printInvalid(); return; }
-        for (const auto& p : polys) if (p.getVertexCount() == n) cnt++;
-    }
-    std::cout << cnt << std::endl;
-}
-
-// ==================== КОМАНДЫ ВАРИАНТА 9 ====================
-
-void doRmecho(std::vector<Polygon>& polys, const Polygon& sample) {
+void processRmecho(std::vector<Polygon>& polygons, const Polygon& target) {
     int removed = 0;
-    size_t i = 0;
-    while (i < polys.size()) {
-        if (polys[i] == sample) {
-            size_t j = i + 1;
-            while (j < polys.size() && polys[j] == sample) {
-                j++;
-                removed++;
+    bool lastWasTarget = false;
+    auto newEnd = std::remove_if(polygons.begin(), polygons.end(),
+        [&](const Polygon& p) mutable {
+            if (p == target) {
+                if (lastWasTarget) {
+                    ++removed;
+                    return true;
+                } else {
+                    lastWasTarget = true;
+                    return false;
+                }
+            } else {
+                lastWasTarget = false;
+                return false;
             }
-            polys.erase(polys.begin() + i + 1, polys.begin() + j);
-            i++;
-        } else {
-            i++;
-        }
-    }
+        });
+    polygons.erase(newEnd, polygons.end());
     std::cout << removed << std::endl;
 }
 
-void doIntersections(const std::vector<Polygon>& polys, const Polygon& sample) {
-    int count = 0;
-    for (const auto& p : polys) {
-        bool intersects = false;
-        for (const auto& pt1 : p.points) {
-            for (const auto& pt2 : sample.points) {
-                if (pt1.x == pt2.x && pt1.y == pt2.y) {
-                    intersects = true;
-                    break;
-                }
-            }
-            if (intersects) break;
-        }
-        if
+void processIntersections(const std::vector<Polygon>& polygons, const Polygon& target) {
+    int cnt = std::count_if(polygons.begin(), polygons.end(),
+        [&](const Polygon& p) { return polygonsIntersect(p, target); });
+    std::cout << cnt << std::endl;
+}

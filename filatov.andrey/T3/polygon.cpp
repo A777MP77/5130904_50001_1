@@ -1,6 +1,8 @@
 #include "polygon.h"
 #include <cmath>
+#include <sstream>
 #include <algorithm>
+#include <cstdlib>
 
 bool Point::operator==(const Point& other) const {
     return x == other.x && y == other.y;
@@ -8,72 +10,92 @@ bool Point::operator==(const Point& other) const {
 
 bool Polygon::operator==(const Polygon& other) const {
     if (points.size() != other.points.size()) return false;
-    for (size_t i = 0; i < points.size(); ++i) {
-        if (points[i].x != other.points[i].x || points[i].y != other.points[i].y) {
-            return false;
+    return std::equal(points.begin(), points.end(), other.points.begin());
+}
+
+double polygonArea(const Polygon& poly) {
+    if (poly.points.size() < 3) return 0.0;
+    double area = 0.0;
+    size_t n = poly.points.size();
+    for (size_t i = 0; i < n; ++i) {
+        const Point& p1 = poly.points[i];
+        const Point& p2 = poly.points[(i + 1) % n];
+        area += p1.x * p2.y - p2.x * p1.y;
+    }
+    return std::abs(area) / 2.0;
+}
+
+// Вспомогательные функции для проверки пересечения
+static int orientation(const Point& a, const Point& b, const Point& c) {
+    long long val = (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+    if (val == 0) return 0;
+    return (val > 0) ? 1 : 2;
+}
+
+static bool onSegment(const Point& p, const Point& q, const Point& r) {
+    if (q.x <= std::max(p.x, r.x) && q.x >= std::min(p.x, r.x) &&
+        q.y <= std::max(p.y, r.y) && q.y >= std::min(p.y, r.y))
+        return true;
+    return false;
+}
+
+static bool segmentsIntersect(const Point& p1, const Point& p2, const Point& p3, const Point& p4) {
+    int o1 = orientation(p1, p2, p3);
+    int o2 = orientation(p1, p2, p4);
+    int o3 = orientation(p3, p4, p1);
+    int o4 = orientation(p3, p4, p2);
+    if (o1 != o2 && o3 != o4) return true;
+    if (o1 == 0 && onSegment(p1, p3, p2)) return true;
+    if (o2 == 0 && onSegment(p1, p4, p2)) return true;
+    if (o3 == 0 && onSegment(p3, p1, p4)) return true;
+    if (o4 == 0 && onSegment(p3, p2, p4)) return true;
+    return false;
+}
+
+static bool pointInPolygon(const Point& p, const Polygon& poly) {
+    bool inside = false;
+    size_t n = poly.points.size();
+    for (size_t i = 0, j = n - 1; i < n; j = i++) {
+        const Point& pi = poly.points[i];
+        const Point& pj = poly.points[j];
+        if (((pi.y > p.y) != (pj.y > p.y)) &&
+            (p.x < (pj.x - pi.x) * (p.y - pi.y) / (pj.y - pi.y) + pi.x))
+            inside = !inside;
+    }
+    return inside;
+}
+
+bool polygonsIntersect(const Polygon& a, const Polygon& b) {
+    // Пересечение сторон
+    for (size_t i = 0; i < a.points.size(); ++i) {
+        const Point& a1 = a.points[i];
+        const Point& a2 = a.points[(i + 1) % a.points.size()];
+        for (size_t j = 0; j < b.points.size(); ++j) {
+            const Point& b1 = b.points[j];
+            const Point& b2 = b.points[(j + 1) % b.points.size()];
+            if (segmentsIntersect(a1, a2, b1, b2)) return true;
         }
     }
-    return true;
+    // Одна фигура внутри другой
+    if (pointInPolygon(a.points[0], b)) return true;
+    if (pointInPolygon(b.points[0], a)) return true;
+    return false;
 }
 
-double Polygon::getArea() const {
-    if (points.size() < 3) return 0.0;
-
-    double sum = 0.0;
-    for (size_t i = 0; i < points.size(); ++i) {
-        size_t j = (i + 1) % points.size();
-        sum += points[i].x * points[j].y - points[j].x * points[i].y;
-    }
-    return std::abs(sum) / 2.0;
-}
-
-int Polygon::getVertexCount() const {
-    return points.size();
-}
-
-bool Polygon::isPermutationOf(const Polygon& other) const {
-    if (points.size() != other.points.size()) return false;
-
-    std::vector<Point> p1 = points;
-    std::vector<Point> p2 = other.points;
-
-    std::sort(p1.begin(), p1.end(), [](const Point& a, const Point& b) {
-        return a.x != b.x ? a.x < b.x : a.y < b.y;
-    });
-    std::sort(p2.begin(), p2.end(), [](const Point& a, const Point& b) {
-        return a.x != b.x ? a.x < b.x : a.y < b.y;
-    });
-
-    return p1 == p2;
-}
-
-std::istream& operator>>(std::istream& is, Point& p) {
-    char ch1, ch2, ch3;
-    if (!(is >> ch1 >> p.x >> ch2 >> p.y >> ch3)) {
-        is.setstate(std::ios::failbit);
-        return is;
-    }
-    if (ch1 != '(' || ch2 != ';' || ch3 != ')') {
-        is.setstate(std::ios::failbit);
-    }
-    return is;
-}
-
-std::istream& operator>>(std::istream& is, Polygon& poly) {
+Polygon parsePolygon(const std::string& str) {
+    Polygon poly;
+    std::istringstream iss(str);
     int n;
-    if (!(is >> n) || n < 3) {
-        is.setstate(std::ios::failbit);
-        return is;
-    }
-
-    poly.points.clear();
+    if (!(iss >> n)) return poly;
     for (int i = 0; i < n; ++i) {
-        Point pt;
-        if (!(is >> pt)) {
-            is.setstate(std::ios::failbit);
-            return is;
+        char c1, c2, c3;
+        int x, y;
+        if (iss >> c1 >> x >> c2 >> y >> c3 && c1 == '(' && c2 == ';' && c3 == ')') {
+            poly.points.push_back({x, y});
+        } else {
+            poly.points.clear();
+            break;
         }
-        poly.points.push_back(pt);
     }
-    return is;
+    return poly;
 }

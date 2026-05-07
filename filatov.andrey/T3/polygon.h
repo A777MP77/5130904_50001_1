@@ -2,22 +2,19 @@
 #define POLYGON_H
 
 #include <vector>
-#include <iostream>
 
 struct Point {
     int x, y;
+    bool operator==(const Point& other) const;
 };
 
 struct Polygon {
     std::vector<Point> points;
-
-    double getArea() const;
-    int getVertexCount() const;
     bool operator==(const Polygon& other) const;
-    bool isPermutationOf(const Polygon& other) const;
 };
 
-std::istream& operator>>(std::istream& is, Point& p);
-std::istream& operator>>(std::istream& is, Polygon& poly);
+double polygonArea(const Polygon& poly);
+bool polygonsIntersect(const Polygon& a, const Polygon& b);
+Polygon parsePolygon(const std::string& str);
 
 #endif
