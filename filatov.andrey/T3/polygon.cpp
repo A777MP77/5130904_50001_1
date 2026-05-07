@@ -2,7 +2,6 @@
 #include <cmath>
 #include <sstream>
 #include <algorithm>
-#include <cstdlib>
 
 bool Point::operator==(const Point& other) const {
     return x == other.x && y == other.y;
@@ -25,7 +24,6 @@ double polygonArea(const Polygon& poly) {
     return std::abs(area) / 2.0;
 }
 
-// Вспомогательные функции для проверки пересечения
 static int orientation(const Point& a, const Point& b, const Point& c) {
     long long val = (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
     if (val == 0) return 0;
@@ -66,7 +64,6 @@ static bool pointInPolygon(const Point& p, const Polygon& poly) {
 }
 
 bool polygonsIntersect(const Polygon& a, const Polygon& b) {
-    // Пересечение сторон
     for (size_t i = 0; i < a.points.size(); ++i) {
         const Point& a1 = a.points[i];
         const Point& a2 = a.points[(i + 1) % a.points.size()];
@@ -76,7 +73,6 @@ bool polygonsIntersect(const Polygon& a, const Polygon& b) {
             if (segmentsIntersect(a1, a2, b1, b2)) return true;
         }
     }
-    // Одна фигура внутри другой
     if (pointInPolygon(a.points[0], b)) return true;
     if (pointInPolygon(b.points[0], a)) return true;
     return false;
@@ -87,15 +83,20 @@ Polygon parsePolygon(const std::string& str) {
     std::istringstream iss(str);
     int n;
     if (!(iss >> n)) return poly;
+    if (n < 3) return poly;              // не многоугольник
     for (int i = 0; i < n; ++i) {
         char c1, c2, c3;
         int x, y;
-        if (iss >> c1 >> x >> c2 >> y >> c3 && c1 == '(' && c2 == ';' && c3 == ')') {
-            poly.points.push_back({x, y});
-        } else {
+        if (!(iss >> c1 >> x >> c2 >> y >> c3) || c1 != '(' || c2 != ';' || c3 != ')') {
             poly.points.clear();
-            break;
+            return poly;
         }
+        poly.points.push_back({x, y});
+    }
+    // после чтения ровно n вершин в строке не должно быть мусора
+    std::string rest;
+    if (iss >> rest) {
+        poly.points.clear();
     }
     return poly;
 }

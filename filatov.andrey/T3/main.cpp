@@ -13,25 +13,9 @@ std::vector<Polygon> readPolygons(const std::string& filename) {
     std::string line;
     while (std::getline(file, line)) {
         if (line.empty()) continue;
-        std::istringstream iss(line);
-        int n;
-        if (!(iss >> n)) continue;
-        Polygon poly;
-        bool ok = true;
-        for (int i = 0; i < n; ++i) {
-            char c1, c2, c3;
-            int x, y;
-            if (!(iss >> c1 >> x >> c2 >> y >> c3) || c1 != '(' || c2 != ';' || c3 != ')') {
-                ok = false;
-                break;
-            }
-            poly.points.push_back({x, y});
-        }
-        // Проверяем, что после прочтения n точек в строке не осталось мусора
-        std::string rest;
-        if (ok && !(iss >> rest)) {
-            polygons.push_back(poly);
-        }
+        Polygon p = parsePolygon(line);
+        if (!p.points.empty())
+            polygons.push_back(p);
     }
     return polygons;
 }
