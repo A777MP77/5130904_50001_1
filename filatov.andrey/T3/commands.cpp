@@ -1,3 +1,11 @@
+#include "commands.h"
+#include <iostream>
+#include <iomanip>
+#include <numeric>
+#include <algorithm>
+#include <vector>
+#include <string>
+
 void processArea(const std::vector<Polygon>& polygons, const std::string& arg) {
     if (arg == "MEAN") {
         if (polygons.empty()) {
@@ -10,7 +18,6 @@ void processArea(const std::vector<Polygon>& polygons, const std::string& arg) {
         return;
     }
 
-    // Для EVEN/ODD/числа – если фигур нет, сумма = 0.0
     if (polygons.empty()) {
         std::cout << "0.0" << std::endl;
         return;
@@ -33,6 +40,42 @@ void processArea(const std::vector<Polygon>& polygons, const std::string& arg) {
     }
 }
 
+void processMax(const std::vector<Polygon>& polygons, const std::string& arg) {
+    if (polygons.empty()) {
+        std::cout << "<INVALID COMMAND>" << std::endl;
+        return;
+    }
+    if (arg == "AREA") {
+        auto it = std::max_element(polygons.begin(), polygons.end(),
+            [](const Polygon& a, const Polygon& b) { return polygonArea(a) < polygonArea(b); });
+        std::cout << std::fixed << std::setprecision(1) << polygonArea(*it) << std::endl;
+    } else if (arg == "VERTEXES") {
+        auto it = std::max_element(polygons.begin(), polygons.end(),
+            [](const Polygon& a, const Polygon& b) { return a.points.size() < b.points.size(); });
+        std::cout << it->points.size() << std::endl;
+    } else {
+        std::cout << "<INVALID COMMAND>" << std::endl;
+    }
+}
+
+void processMin(const std::vector<Polygon>& polygons, const std::string& arg) {
+    if (polygons.empty()) {
+        std::cout << "<INVALID COMMAND>" << std::endl;
+        return;
+    }
+    if (arg == "AREA") {
+        auto it = std::min_element(polygons.begin(), polygons.end(),
+            [](const Polygon& a, const Polygon& b) { return polygonArea(a) < polygonArea(b); });
+        std::cout << std::fixed << std::setprecision(1) << polygonArea(*it) << std::endl;
+    } else if (arg == "VERTEXES") {
+        auto it = std::min_element(polygons.begin(), polygons.end(),
+            [](const Polygon& a, const Polygon& b) { return a.points.size() < b.points.size(); });
+        std::cout << it->points.size() << std::endl;
+    } else {
+        std::cout << "<INVALID COMMAND>" << std::endl;
+    }
+}
+
 void processCount(const std::vector<Polygon>& polygons, const std::string& arg) {
     if (arg == "EVEN" || arg == "ODD") {
         bool isEven = (arg == "EVEN");
@@ -41,7 +84,6 @@ void processCount(const std::vector<Polygon>& polygons, const std::string& arg) 
         std::cout << cnt << std::endl;
     } else {
         int vertexCount = std::stoi(arg);
-        // Многоугольник должен иметь хотя бы 3 вершины
         if (vertexCount < 3) {
             std::cout << "<INVALID COMMAND>" << std::endl;
             return;
@@ -50,4 +92,32 @@ void processCount(const std::vector<Polygon>& polygons, const std::string& arg) 
             [vertexCount](const Polygon& p) { return p.points.size() == static_cast<size_t>(vertexCount); });
         std::cout << cnt << std::endl;
     }
+}
+
+void processRmecho(std::vector<Polygon>& polygons, const Polygon& target) {
+    int removed = 0;
+    bool lastWasTarget = false;
+    auto newEnd = std::remove_if(polygons.begin(), polygons.end(),
+        [&](const Polygon& p) mutable {
+            if (p == target) {
+                if (lastWasTarget) {
+                    ++removed;
+                    return true;
+                } else {
+                    lastWasTarget = true;
+                    return false;
+                }
+            } else {
+                lastWasTarget = false;
+                return false;
+            }
+        });
+    polygons.erase(newEnd, polygons.end());
+    std::cout << removed << std::endl;
+}
+
+void processIntersections(const std::vector<Polygon>& polygons, const Polygon& target) {
+    int cnt = std::count_if(polygons.begin(), polygons.end(),
+        [&](const Polygon& p) { return polygonsIntersect(p, target); });
+    std::cout << cnt << std::endl;
 }

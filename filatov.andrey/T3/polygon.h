@@ -2,7 +2,7 @@
 #define POLYGON_H
 
 #include <vector>
-#include <string>   // ← добавить эту строку
+#include <string>
 
 struct Point {
     int x, y;
